@@ -57,11 +57,13 @@ for (var i = 0; i < fileCount; i++) {
             throw err;
         }
 
-        sys.puts(data);
+        // sys.puts(data);
 
         filesProcessed++;
         if (filesProcessed === fileCount) {
-            fs.writeFile("tags", tags.toString());
+            var out = fs.createWriteStream("tags");
+            tags.write(out);
+            out.end();
         }
     });
 }
