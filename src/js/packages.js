@@ -40,32 +40,61 @@
 
 tiki.register('::narcissus', {
     name:           'narcissus',
-    //version:        "0.0.0",
-    /* 'tiki:scripts': {
-        'narcissus':            "../lib/narcissus/index.js",
-        'narcissus/jsdefs':     "../lib/narcissus/jsdefs.js",
-        'narcissus/jslex':      "../lib/narcissus/jslex.js",
-        'narcissus/jsparse':    "../lib/narcissus/jsparse.js"
-    } */
-    'tiki:resources': [{
-        url: "parser.html", //"lib/narcissus/index.js",
-        type: 'script',
-        id: 'narcissus',
-        name: 'index.js'
-    }]
+    version:        "0.0.0",
+    'tiki:resources': [
+        {
+            id:     'narcissus:index',
+            name:   'index',
+            url:    "lib/narcissus/index.js",
+            type:   'script'
+        },
+        {
+            id:     'narcissus:jsdefs',
+            name:   'jsdefs.js',
+            url:    "lib/narcissus/jsdefs.js",
+            type:   'script'
+        },
+        {
+            id:     'narcissus:jslex',
+            name:   'jslex.js',
+            url:    "lib/narcissus/jslex.js",
+            type:   'script'
+        },
+        {
+            id:     'narcissus:jsparse',
+            name:   'jsparse.js',
+            url:    "lib/narcissus/jsparse.js",
+            type:   'script'
+        }
+    ]
 });
 
 tiki.register('::ctags', {
     name:           'ctags',
-    //version:        "0.0.0",
+    version:        "0.0.0",
     dependencies:   {
         narcissus:  "0.0.0"
     },
-    'tiki:scripts': {
-        'ctags':                "../lib/ctags/index.js",
-        'ctags/reader':         "../lib/ctags/reader.js",
-        'ctags/writer':         "../lib/ctags/writer.js"
-    }
+    'tiki:resources': [
+        {
+            id:     'ctags:',
+            name:   'index.js',
+            url:    "lib/ctags/index.js",
+            type:   'script'
+        },
+        {
+            id:     'ctags:reader',
+            name:   'reader.js',
+            url:    "lib/ctags/reader.js",
+            type:   'script'
+        },
+        {
+            id:     'ctags:writer',
+            name:   'writer.js',
+            url:    "lib/ctags/writer.js",
+            type:   'script'
+        }
+    ]
 });
 
 // Turn on autowrap so that the same .js files can be used both offline and in

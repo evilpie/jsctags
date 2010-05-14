@@ -36,13 +36,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-require.paths.unshift('lib');
+var argv = process.argv;
+var path = require('path');
+require.paths.unshift(path.join(path.dirname(argv[1]), '..', 'src', 'lib'));
+
 var fs = require('fs');
 var sys = require('sys');
 var ctags = require('ctags');
 var Tags = ctags.Tags;
 
-var argv = process.argv;
 var tags = new Tags();
 
 var filesProcessed = 0, fileCount = argv.length - 2;

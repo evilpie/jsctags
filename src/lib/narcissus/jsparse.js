@@ -41,8 +41,8 @@
  * Parser.
  */
 
-var m_jsdefs = require('narcissus/jsdefs');
-var Tokenizer = require('narcissus/jslex').Tokenizer;
+var m_jsdefs = require('./jsdefs');
+var Tokenizer = require('./jslex').Tokenizer;
 var opTypeNames = m_jsdefs.opTypeNames;
 var tokens = m_jsdefs.tokens;
 var tokenIds = m_jsdefs.tokenIds;

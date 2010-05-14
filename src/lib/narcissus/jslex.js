@@ -41,7 +41,7 @@
  * Lexical scanner.
  */
 
-var m_jsdefs = require('narcissus/jsdefs');
+var m_jsdefs = require('./jsdefs');
 var assignOps = m_jsdefs.assignOps;
 var keywords = m_jsdefs.keywords;
 var opTypeNames = m_jsdefs.opTypeNames;

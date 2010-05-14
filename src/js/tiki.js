@@ -3081,10 +3081,9 @@ Browser.prototype._xhrScript = function(id, url) {
     }
 
     var src = req.responseText;
-    console.log("autowrap", autowrap);
     if (autowrap) {
-      src = "tiki.module('" + id.replace(/\.js$/, '') + "', " +
-        "function(require, exports, module) {" + src + "});";
+      src = "tiki.module('" + id + "', function(require, exports, module) {" +
+        src + "});" + "tiki.script('" + id + "');";
     }
 
     // Add a Firebug-style sourceURL parameter to help debugging.
@@ -3105,15 +3104,11 @@ Browser.prototype._loadScript = function(id, url) {
         }
     }
 
-    console.log("xhravail", xhrAvailable, "domAvailable", domAvailable);
-    console.log("autowrap", this.autowrap, "xhr", this.xhr);
-
     if (xhrAvailable && domAvailable) {
         if (this.xhr) {
             try {
                 return this._xhrScript(id, url);
             } catch (e) {
-                console.log("uh-oh " + url + ": " + e);
                 return this._injectScript(id, url);
             }
         } else {
