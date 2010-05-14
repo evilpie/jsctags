@@ -2891,6 +2891,14 @@ var xhrAvailable = T_UNDEFINED !== typeof XMLHttpRequest;
 */
 Browser.prototype.xhr = !domAvailable;
 
+/**
+  Whether to automatically wrap the fetched JavaScript in tiki.module() and
+  tiki.script() calls. With this on, CommonJS modules will "just work" without
+  preprocessing. Setting this to true requires, and implies, that XHR will be
+  used to fetch the files.
+*/
+Browser.prototype.autowrap = false;
+
 var findPublicPackageInfo = function(infos) {
   if (!infos) return null;
   
@@ -3062,6 +3070,8 @@ Browser.prototype._injectScript = function(id, url) {
 };
 
 Browser.prototype._xhrScript = function(id, url) {
+  var autowrap = this.autowrap;
+
   var req = new XMLHttpRequest();
   req.open('GET', url, true);
   req.onreadystatechange = function(evt) {
@@ -3070,19 +3080,40 @@ Browser.prototype._xhrScript = function(id, url) {
       return;
     }
 
+    var src = req.responseText;
+    console.log("autowrap", autowrap);
+    if (autowrap) {
+      src = "tiki.module('" + id.replace(/\.js$/, '') + "', " +
+        "function(require, exports, module) {" + src + "});";
+    }
+
     // Add a Firebug-style sourceURL parameter to help debugging.
-    eval(req.responseText + "\n//@ sourceURL=" + url);
+    eval(src + "\n//@ sourceURL=" + url);
+
+    // Immediately return after the eval. The script may have stomped all over
+    // our local state.
   };
 
   req.send(null);
 };
 
 Browser.prototype._loadScript = function(id, url) {
+    if (this.autowrap) {
+        this.xhr = true;
+        if (!xhrAvailable) {
+            DEBUG('Autowrap is on but XHR is not available. Danger ahead.');
+        }
+    }
+
+    console.log("xhravail", xhrAvailable, "domAvailable", domAvailable);
+    console.log("autowrap", this.autowrap, "xhr", this.xhr);
+
     if (xhrAvailable && domAvailable) {
         if (this.xhr) {
             try {
                 return this._xhrScript(id, url);
             } catch (e) {
+                console.log("uh-oh " + url + ": " + e);
                 return this._injectScript(id, url);
             }
         } else {
