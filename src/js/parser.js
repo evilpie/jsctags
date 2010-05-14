@@ -35,12 +35,78 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+const CHILDREN_KEYS = [
+    'setup', 'varDecl', 'object', 'condition', 'iterator', 'discriminant',
+    'cases', 'update', 'tryBlock', 'body', 'expression', 'statement', 'value',
+    'thenPart', 'elsePart', 'catchClauses', 'finallyBlock'
+];
+
 function parse() {
     tiki.ensurePackage('::narcissus', function() {
         var require = tiki.require;
-        var parse = require('narcissus:index').parse;
-        parse($('#js').val(), 'js', 1);
-        $('#tree').text("Success!");
+        var parse = require('narcissus').parse;
+        var jsdefs = require('narcissus:jsdefs');
+        var tokenIds = jsdefs.tokenIds;
+
+        var astToJSON = function(ast) {
+            var desc;
+            if (ast.type in jsdefs.tokens) {
+                desc = jsdefs.tokens[ast.type];
+            } else {
+                desc = "?";
+            }
+
+            var nameField;
+            switch (ast.type) {
+            case tokenIds.IDENTIFIER:
+            case tokenIds.NUMBER:
+            case tokenIds.STRING:
+            case tokenIds.REGEXP:
+                nameField = 'value';
+                break;
+            case tokenIds.BREAK:
+            case tokenIds.CONTINUE:
+            default:
+                nameField = 'name';
+            }
+            if (nameField in ast) {
+                desc += " " + ast[nameField];
+            }
+
+            var json = { data: desc };
+
+            var children = ast.slice(0);
+            CHILDREN_KEYS.forEach(function(childKey) {
+                if (!(childKey in ast)) {
+                    return;
+                }
+
+                var value = ast[childKey];
+                if (typeof(value) !== 'object' || value === null) {
+                    return;
+                }
+
+                if ('tokenizer' in value) {
+                    children.push(value);
+                } else if (value[0] !== undefined) {
+                    children.push.apply(children, value);
+                }
+            });
+
+            if (children.length > 0) {
+                json.children = children.map(astToJSON);
+            }
+
+            return json;
+        };
+
+        var ast = parse($('#js').val(), 'js', 1);
+        $('#tree').tree({
+            data: {
+                type:   'json',
+                opts:   { static: astToJSON(ast) }
+            }
+        });
     });
 }
 
