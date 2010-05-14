@@ -39,57 +39,56 @@ var Trait = require('traits').Trait;
 
 const ESCAPES = { "\\": "\\\\", "\n": "\\n", "\r": "\\r", "\t": "\\t" };
 
-const METATAGS = {
-    '!_TAG_FILE_FORMAT': { file: 2, addr: "/extended format/" },
-    '!_TAG_FILE_SORTED': { file: 1, addr: "/0=unsorted, 1=sorted, 2=foldcase/" },
-    '!_TAG_PROGRAM_AUTHOR': {
+const METATAGS = [
+    { name: '!_TAG_FILE_FORMAT', file: 2, addr: "/extended format/" },
+    {
+        name: '!_TAG_FILE_SORTED',
+        file: 1,
+        addr: "/0=unsorted, 1=sorted, 2=foldcase/"
+    },
+    {
+        name: '!_TAG_PROGRAM_AUTHOR',
         file: "Patrick Walton",
         addr: "/pwalton@mozilla.com/"
     },
-    '!_TAG_PROGRAM_NAME': { file: "jsctags" },
-    '!_TAG_PROGRAM_URL': {
+    { name: '!_TAG_PROGRAM_NAME', file: "jsctags" },
+    {
+        name: '!_TAG_PROGRAM_URL',
         file: "http://github.com/pcwalton/jsctags",
         addr: "/GitHub repository/"
     },
-    '!_TAG_PROGRAM_VERSION': { file: "0.1" }
-};
+    { name: '!_TAG_PROGRAM_VERSION', file: "0.1" }
+];
 
 exports.TagWriter = Trait({
     tags: Trait.required,
 
+    init: function() {
+        this.tags = this.tags.concat(METATAGS);
+    },
+
     write: function(stream) {
         var tags = this.tags;
+        tags.sort(function(a, b) { return a.name.localeCompare(b.name); });
 
-        var names = [];
-        for (name in tags) {
-            names.push(name);
-        }
-        for (name in METATAGS) {
-            names.push(name);
-        }
-        names.sort();
-
-        names.forEach(function(name) {
-            stream.write(name);
+        tags.forEach(function(tag) {
+            stream.write(tag.name);
+            stream.write("\t");
+            stream.write(tag.file);
             stream.write("\t");
 
-            var data = name in METATAGS ? METATAGS[name] : tags[name];
-
-            stream.write(data.file);
-            stream.write("\t");
-
-            var addr = data.addr;
+            var addr = tag.addr;
             stream.write(addr !== undefined ? addr : "//");
 
             var tagfields = [];
-            for (var key in data) {
+            for (var key in tag) {
                 if (key !== 'addr' && key !== 'file' && key !== 'kind') {
                     tagfields.push(key);
                 }
             }
             tagfields.sort();
 
-            var kind = data.kind;
+            var kind = tag.kind;
             if (kind === undefined && tagfields.length === 0) {
                 stream.write("\n");
                 return;
@@ -107,7 +106,7 @@ exports.TagWriter = Trait({
                 stream.write(":");
 
                 var escape = function(str) { return ESCAPES[str]; };
-                stream.write(data[tagfield].replace("[\\\n\r\t]", escape));
+                stream.write(tag[tagfield].replace("[\\\n\r\t]", escape));
             });
 
             stream.write("\n");

@@ -40,7 +40,8 @@ var Trait = require('traits').Trait;
 var parse = require('narcissus').parse;
 
 exports.Tags = function() {
-    this.tags = {};
+    this.tags = [];
+    this.init();
 };
 
 exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
