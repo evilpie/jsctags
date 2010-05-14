@@ -52,12 +52,17 @@ if (fileCount === 0) {
 }
 
 for (var i = 0; i < fileCount; i++) {
-    fs.readFile(argv[i + 2], function(err, data) {
+    var path = argv[i + 2];
+    fs.readFile(path, function(err, data) {
         if (err) {
             throw err;
         }
 
-        // sys.puts(data);
+        try {
+            tags.add(data, path, {});
+        } catch (e) {
+            sys.puts(e.fileName + ":" + e.lineNumber + ": " + e);
+        }
 
         filesProcessed++;
         if (filesProcessed === fileCount) {
