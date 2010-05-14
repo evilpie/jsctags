@@ -61,6 +61,10 @@ for (var i = 0; i < fileCount; i++) {
         try {
             tags.add(data, path, {});
         } catch (e) {
+            if ('stack' in e) {
+                throw e;    // it's an internal error
+            }
+
             sys.puts(e.fileName + ":" + e.lineNumber + ": " + e);
         }
 
