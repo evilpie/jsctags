@@ -40,25 +40,27 @@ var Trait = require('traits').Trait;
 const ESCAPES = { "\\": "\\\\", "\n": "\\n", "\r": "\\r", "\t": "\\t" };
 
 const METATAGS = [
-    { name: '!_TAG_FILE_FORMAT', file: 2, addr: "/extended format/" },
+    { name: '!_TAG_FILE_FORMAT', tagfile: 2, addr: "/extended format/" },
     {
-        name: '!_TAG_FILE_SORTED',
-        file: 1,
-        addr: "/0=unsorted, 1=sorted, 2=foldcase/"
+        name:       '!_TAG_FILE_SORTED',
+        tagfile:    1,
+        addr:       "/0=unsorted, 1=sorted, 2=foldcase/"
     },
     {
-        name: '!_TAG_PROGRAM_AUTHOR',
-        file: "Patrick Walton",
-        addr: "/pwalton@mozilla.com/"
+        name:       '!_TAG_PROGRAM_AUTHOR',
+        tagfile:    "Patrick Walton",
+        addr:       "/pwalton@mozilla.com/"
     },
-    { name: '!_TAG_PROGRAM_NAME', file: "jsctags" },
+    { name: '!_TAG_PROGRAM_NAME', tagfile: "jsctags" },
     {
-        name: '!_TAG_PROGRAM_URL',
-        file: "http://github.com/pcwalton/jsctags",
-        addr: "/GitHub repository/"
+        name:       '!_TAG_PROGRAM_URL',
+        tagfile:    "http://github.com/pcwalton/jsctags",
+        addr:       "/GitHub repository/"
     },
-    { name: '!_TAG_PROGRAM_VERSION', file: "0.1" }
+    { name: '!_TAG_PROGRAM_VERSION', tagfile: "0.1" }
 ];
+
+const SPECIAL_FIELDS = { addr: true, kind: true, name: true, tagfile: true };
 
 exports.TagWriter = Trait({
     tags: Trait.required,
@@ -74,7 +76,7 @@ exports.TagWriter = Trait({
         tags.forEach(function(tag) {
             stream.write(tag.name);
             stream.write("\t");
-            stream.write(tag.file);
+            stream.write(tag.tagfile);
             stream.write("\t");
 
             var addr = tag.addr;
@@ -82,7 +84,7 @@ exports.TagWriter = Trait({
 
             var tagfields = [];
             for (var key in tag) {
-                if (key !== 'addr' && key !== 'file' && key !== 'kind') {
+                if (!(key in SPECIAL_FIELDS)) {
                     tagfields.push(key);
                 }
             }
