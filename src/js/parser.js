@@ -56,6 +56,10 @@ function parse() {
                 desc = "?";
             }
 
+            if ('lineno' in ast) {
+                desc += " @ " + ast.lineno;
+            }
+
             var nameField;
             switch (ast.type) {
             case tokenIds.IDENTIFIER:
