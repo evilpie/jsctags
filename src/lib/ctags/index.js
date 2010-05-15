@@ -35,9 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var TagWriter = require('ctags/writer').TagWriter;
-var Trait = require('traits').Trait;
 var parse = require('narcissus').parse;
+var Interpreter = require('./interp').Interpreter;
+var TagWriter = require('./writer').TagWriter;
+var Trait = require('traits').Trait;
 
 exports.Tags = function() {
     this.tags = [];
@@ -51,6 +52,7 @@ exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
         }
 
         var ast = parse(src, file, 1);
+        this.interpret(ast, file, {});
     }
-}), TagWriter));
+}), Interpreter, TagWriter));
 
