@@ -173,6 +173,9 @@ function Block(t, x) {
 }
 
 const DECLARED_FORM = 0, EXPRESSED_FORM = 1, STATEMENT_FORM = 2;
+exports.DECLARED_FORM = DECLARED_FORM;
+exports.EXPRESSED_FORM = EXPRESSED_FORM;
+exports.STATEMENT_FORM = STATEMENT_FORM;
 
 function Statement(t, x) {
     var i, label, n, n2, ss, tt = t.get();
