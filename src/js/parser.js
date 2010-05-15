@@ -79,7 +79,14 @@ function parse() {
 
             var json = { data: desc };
 
-            var children = ast.slice(0);
+            var children = [];
+
+            var i = 0;
+            while (ast[i] !== null && ast[i] !== undefined) {
+                children.push(ast[i]);
+                i++;
+            }
+
             CHILDREN_KEYS.forEach(function(childKey) {
                 if (!(childKey in ast)) {
                     return;
