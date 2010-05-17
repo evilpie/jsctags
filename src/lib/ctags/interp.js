@@ -38,7 +38,8 @@
 // Abstract interpreter, based on Narcissus.
 
 var jsdefs = require('narcissus/jsdefs');
-var tokens = jsdefs.tokens;
+var jsparse = require('narcissus/jsparse');
+var tokenIds = jsdefs.tokenIds, tokens = jsdefs.tokens;
 var Trait = require('traits').Trait;
 
 var puts = require('sys').puts;
@@ -47,7 +48,7 @@ exports.Interpreter = Trait({
     _addDefs: function(defs, baseTag) {
         for (var name in defs) {
             var def = defs[name];
-            if (def.hidden) {
+            if (def.hidden || !('node' in def)) {
                 continue;
             }
 
@@ -67,26 +68,88 @@ exports.Interpreter = Trait({
     },
 
     _exec: function(node, ctx) {
+        var self = this;
+        var doExec = function(node) { return self._exec(node, ctx); };
+
         switch (node.type) {
-        case tokens.SCRIPT:
-            var scopeObject = ctx.scope.object;
+        case tokenIds.FUNCTION:
+            if (node.functionForm === jsparse.EXPRESSED_FORM) {
+                return;
+            }
+
+            var isStatement = node.functionForm === jsparse.STATEMENT_FORM;
+            if (node.name !== null && node.name !== undefined && !isStatement) {
+                // Introduce a new scope.
+                ctx.scope = { object: {}, parent: ctx.scope };
+            }
+
+            var fn = { type: 'function', node: node, value: ctx.scope };
+
+            if (isStatement) {
+                ctx.scope.object[node.name] = fn;
+            }
+
+            return fn;
+
+        case tokenIds.SCRIPT:
             node.funDecls.forEach(function(decl) {
-                scopeObject[decl.name] = { node: decl, value: decl };
+                ctx.scope.object[decl.name] = { node: decl, value: ctx.scope };
             });
             node.varDecls.forEach(function(decl) {
-                scopeObject[decl.name] = { node: decl, value: decl };
+                ctx.scope.object[decl.name] = { node: decl, value: decl };
             });
 
             // FALL THROUGH
-        case tokens.BLOCK:
-            node.forEach(function(node) { this._exec(ctx, node); }, this);
+        case tokenIds.BLOCK:
+            node.forEach(doExec);
             break;
 
-        case tokens.SEMICOLON:
+        case tokenIds.SEMICOLON:
             if (node.expression !== null && node.expression !== undefined) {
-                this._exec(ctx, node.expression);
+                return doExec(node.expression);
             }
             break;
+
+        case tokenIds.LIST:
+            var args = { node: node };
+            args.value = node.map(doExec);
+            args.value.length = node.length;
+            return args;
+
+        case tokenIds.CALL:
+            var lhs = doExec(node[0]);
+            var rhs = doExec(node[1]);
+            // TODO: valueOf to dereference stuff
+            if (typeof(lhs) !== 'object' || lhs.type !== 'function') {
+                puts("not a function");
+                return;
+            }
+
+            var thisObject = (lhs.type === 'reference')
+            puts("call TODO"); // TODO
+            break;
+
+        case tokenIds.IDENTIFIER:
+            var scope = ctx.scope;
+            while (scope !== null) {
+                if (node.value in scope.object) {
+                    break;
+                }
+            }
+
+            var container = scope === null ? null : scope.object;
+            return {
+                type:       'reference',
+                container:  container,
+                name:       node.value,
+                node:       node
+            };
+
+        case tokenIds.GROUP:
+            return doExec(node[0]);
+
+        default:
+            puts("unknown token " + tokens[node.type] + " @ " + node.lineno);
         }
     },
 
@@ -94,23 +157,27 @@ exports.Interpreter = Trait({
     interpret: function(ast, module, opts) {
         var exportsDefs, windowDefs = {};
 
-        var scope = {
-            parent: null,
-            object: { window: { hidden: true, value: windowDefs } }
-        }
+        var ctx = {
+            scope: {
+                parent: null,
+                object: { window: { hidden: true, value: windowDefs } }
+            }
+        };
 
         if (opts.commonJS) {
             exportsDefs = {};
-            scope.object.exports = { hidden: true, value: exportsDefs };
+            ctx.scope.object.exports = { hidden: true, value: exportsDefs };
         }
 
-        var ctx = { scope: scope };
         this._exec(ast, ctx, opts);
 
         this._addDefs(windowDefs, {});
-
         if (!opts.commonJS) {
-            this._addDefs(scope.object, {});
+            var scope = ctx.scope;
+            while (scope !== null) {
+                this._addDefs(scope.object, {});
+                scope = scope.parent;
+            }
         } else {
             this._addDefs(exportsDefs, { module: module });
         }
