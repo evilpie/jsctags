@@ -44,6 +44,32 @@ var Trait = require('traits').Trait;
 
 var puts = require('sys').puts;
 
+function FunctionObject(interp, node, scope) {
+    this.interp = interp;
+    this.node = node;
+    this.scope = scope;
+};
+
+FunctionObject.prototype = {
+    call: function(thisObject, args) {
+        var ctx = { scope: { object: {}, parent: this.scope } };
+
+        try {
+            this.interp._exec(this.node.body, ctx);
+        } catch (e) {
+            if (e === 'return') {
+                return ctx.result;
+            }
+
+            throw e;
+        }
+
+        return undefined;
+    },
+
+    type: 'function'
+};
+
 exports.Interpreter = Trait({
     _addDefs: function(defs, baseTag) {
         for (var name in defs) {
@@ -67,28 +93,43 @@ exports.Interpreter = Trait({
         }
     },
 
+    _deref: function(val) {
+        if (val.type === 'ref') {
+            if (val.container === undefined) {
+                return null;    // true behavior: ReferenceError
+            }
+            return val.container[val.name];
+        }
+        return val;
+    },
+
     _exec: function(node, ctx) {
         var self = this;
-        var doExec = function(node) { return self._exec(node, ctx); };
+
+        function deref(val) { return self._deref(val); }
+        function exec(node) { return self._exec(node, ctx); }
+
+        puts("executing node " + tokens[node.type] + " @ " + node.lineno);
 
         switch (node.type) {
         case tokenIds.FUNCTION:
-            if (node.functionForm === jsparse.EXPRESSED_FORM) {
+            if (node.functionForm === jsparse.DECLARED_FORM) {
                 return;
             }
 
             var isStatement = node.functionForm === jsparse.STATEMENT_FORM;
-            if (node.name !== null && node.name !== undefined && !isStatement) {
+            if (node.name != null && !isStatement) {
                 // Introduce a new scope.
                 ctx.scope = { object: {}, parent: ctx.scope };
             }
 
-            var fn = { type: 'function', node: node, value: ctx.scope };
+            var fn = new FunctionObject(this, node, ctx.scope);
 
             if (isStatement) {
                 ctx.scope.object[node.name] = fn;
             }
 
+            puts("returning fn " + fn);
             return fn;
 
         case tokenIds.SCRIPT:
@@ -101,33 +142,36 @@ exports.Interpreter = Trait({
 
             // FALL THROUGH
         case tokenIds.BLOCK:
-            node.forEach(doExec);
+            node.forEach(exec);
             break;
 
         case tokenIds.SEMICOLON:
-            if (node.expression !== null && node.expression !== undefined) {
-                return doExec(node.expression);
+            if (node.expression != null) {
+                exec(node.expression);
             }
-            break;
+            return;
 
         case tokenIds.LIST:
             var args = { node: node };
-            args.value = node.map(doExec);
+            args.value = node.map(exec).map(deref);
             args.value.length = node.length;
             return args;
 
         case tokenIds.CALL:
-            var lhs = doExec(node[0]);
-            var rhs = doExec(node[1]);
-            // TODO: valueOf to dereference stuff
-            if (typeof(lhs) !== 'object' || lhs.type !== 'function') {
+            var lhs = exec(node[0]);
+            var rhs = exec(node[1]);
+            var fn = deref(lhs);
+            if (fn.type !== 'function') {
                 puts("not a function");
-                return;
+                return { type: 'scalar', value: null };
             }
 
-            var thisObject = (lhs.type === 'reference')
-            puts("call TODO"); // TODO
-            break;
+            var thisObject = (lhs.type === 'ref' ? r.base : null);
+            if (thisObject != null && thisObject.type === 'activation') {
+                thisObject = null;
+            }
+
+            return fn.call(thisObject, args);
 
         case tokenIds.IDENTIFIER:
             var scope = ctx.scope;
@@ -139,17 +183,18 @@ exports.Interpreter = Trait({
 
             var container = scope === null ? null : scope.object;
             return {
-                type:       'reference',
+                type:       'ref',
                 container:  container,
                 name:       node.value,
                 node:       node
             };
 
         case tokenIds.GROUP:
-            return doExec(node[0]);
+            return exec(node[0]);
 
         default:
             puts("unknown token " + tokens[node.type] + " @ " + node.lineno);
+            return { type: 'scalar', value: null };
         }
     },
 
