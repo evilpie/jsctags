@@ -155,7 +155,7 @@ exports.Tokenizer.prototype = {
                         break;
                     }
                 }
-            } else if (ch !== ' ' && ch !== '\t') {
+            } else if (ch !== ' ' && ch !== '\t' && ch !== '\r') {
                 this.cursor--;
                 return;
             }
@@ -417,7 +417,7 @@ exports.Tokenizer.prototype = {
             token.value = '\n';
             this.lineno++;
         } else {
-            throw this.newSyntaxError("Illegal token");
+            throw this.newSyntaxError("Illegal character " + ch.charCodeAt(0));
         }
 
         token.end = this.cursor;

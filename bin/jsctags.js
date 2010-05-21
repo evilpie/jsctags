@@ -43,39 +43,139 @@ require.paths.unshift(path.join(path.dirname(argv[1]), '..', 'src', 'lib'));
 var fs = require('fs');
 var sys = require('sys');
 var ctags = require('ctags');
+var getopt = require('getopt').getopt;
 var Tags = ctags.Tags;
 
-var tags = new Tags();
-
-var filesProcessed = 0, fileCount = argv.length - 2;
-if (fileCount === 0) {
-    sys.puts("usage: jsctags file0.js [.. fileN.js]");
+function usage() {
+    sys.puts("usage: jsctags [options] path0 [.. pathN]");
+    sys.puts("options:");
+    sys.puts("    -h, --help            display this usage info");
+    sys.puts("    -L, --libroot dir     add a CommonJS module root (like " +
+        "require.paths)")
     process.exit(1);
 }
 
-for (var i = 0; i < fileCount; i++) {
-    var path = argv[i + 2];
-    fs.readFile(path, function(err, data) {
-        if (err) {
-            throw err;
-        }
+var opts;
+try {
+    opts = getopt("help|h", "libroot|L=s@");
+} catch (e) {
+    sys.puts(e);
+    usage();
+}
 
-        try {
-            tags.add(data, path, {});
-        } catch (e) {
-            if ('stack' in e) {
-                throw e;    // it's an internal error
-            }
+var pathCount = argv.length - 2;
+if (opts.help || pathCount === 0) {
+    usage();
+}
 
-            sys.puts(e.fileName + ":" + e.lineNumber + ": " + e);
-        }
-
-        filesProcessed++;
-        if (filesProcessed === fileCount) {
-            var out = fs.createWriteStream("tags");
-            tags.write(out);
-            out.end();
-        }
+var librootIds = {};
+if ('libroot' in opts) {
+    opts.libroot.forEach(function(libroot) {
+        var st = fs.statSync(libroot);
+        var id = st.dev + "," + st.ino;
+        librootIds[id] = true;
     });
 }
+
+var tags = new Tags();
+
+var idsSeen = {};
+function processPath(cur, library, moduleId, packageId) {
+    var st = fs.statSync(cur);
+    var id = st.dev + "," + st.ino;
+    if (id in idsSeen) {
+        return; // avoid loops
+    }
+    idsSeen[id] = true;
+
+    var ext = path.extname(cur);
+
+    if (st.isDirectory()) {
+        var basename = path.basename(cur);
+        var submoduleId;
+        try {
+            var packageMetadataPath = path.join(cur, "package.json");
+            var packageMetadata = fs.readFileSync(packageMetadataPath);
+            var subpackageId = JSON.parse(packageMetadata).name;
+            if (typeof(subpackageId) !== 'string') {
+                // Fall back to the directory name in case we're in a package
+                // that doesn't conform to the CommonJS spec, such as a Bespin
+                // plugin.
+                subpackageId = basename;
+            }
+
+            var libDir = path.join(cur, "lib");
+            try {
+                var libst = fs.statSync(libDir);
+                if (!libst.isDirectory()) {
+                    throw 'nondirectory';
+                }
+
+                processPath(libDir, true, "", subpackageId);
+            } catch (e) {
+                //
+                // We're in a nonconformant (Bespin-style) package lacking a
+                // "lib" directory. Assume that the module files are rooted
+                // alongside the package.json file.
+                //
+                // FIXME: Check the exception. Make sure it's an ENOENT or
+                // 'nondirectory'.
+                //
+                packageId = subpackageId;
+            }
+
+            submoduleId = "";
+        } catch (e) {
+            //
+            // Not a CommonJS package.
+            //
+            // FIXME: Check the exception. Make sure it's an ENOENT.
+            //
+            if (library) {
+                var submodulePrefix = (moduleId === "") ? "" : moduleId + "/";
+                submoduleId = submodulePrefix + basename;
+            } else {
+                if (id in librootIds) {
+                    library = true;
+                    packageId = "";
+                }
+
+                submoduleId = "";
+            }
+        }
+
+        fs.readdirSync(cur).forEach(function(filename) {
+            var subpath = path.join(cur, filename);
+            processPath(subpath, library, submoduleId, packageId);
+        });
+    } else if (ext === ".js") {
+        var packagePrefix = (packageId === "") ? "" : packageId + ":";
+        var basenameNoExt = path.basename(cur, ext);
+        var thisModuleId;
+        if (basenameNoExt === "index") {
+            thisModuleId = packagePrefix + moduleId;
+        } else {
+            var modulePrefix = (moduleId === "") ? "" : moduleId + "/";
+            thisModuleId = packagePrefix + modulePrefix + basenameNoExt;
+        }
+        var data = fs.readFileSync(cur);
+
+        try {
+            tags.add(data, cur, { commonJS: library, module: thisModuleId });
+        } catch (e) {
+            if ('lineNumber' in e) {
+                sys.puts("at line " + e.lineNumber + ":");
+            }
+            throw e;
+        }
+    }
+}
+
+for (var i = 0; i < pathCount; i++) {
+    processPath(argv[i + 2], false, "", "");
+}
+
+var out = fs.createWriteStream("tags");
+tags.write(out);
+out.end();
 

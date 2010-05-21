@@ -135,6 +135,10 @@ exports.Interpreter.prototype = {
             }
         }
 
+        if ('module' in parentTag) {
+            tag.module = parentTag.module;
+        }
+
         this._addValue(value, tag, stack.concat(value));
     },
 
@@ -156,7 +160,8 @@ exports.Interpreter.prototype = {
             tag.tagfile = node.filename;
             tag.addr = this._regexify(this.lines[node.lineno - 1]);
 
-            if (!value.hidden && /^\S/.test(tag.name)) {
+            // Make sure tags won't get sorted above the metadata...
+            if (/^[^\001-!]/.test(tag.name)) {
                 this.tags.push(tag);
             }
         }
@@ -169,7 +174,10 @@ exports.Interpreter.prototype = {
         // Recurse through members.
         var data = value.data;
         for (var name in data) {
-            this._addSubtag(tag, name, data[name], stack, false);
+            var subvalue = data[name];
+            if (!subvalue.hidden) {
+                this._addSubtag(tag, name, subvalue, stack, false);
+            }
         }
 
         // Stop here if there's no sane prototype.
@@ -178,10 +186,13 @@ exports.Interpreter.prototype = {
             return;
         }
 
-        // Recurse through the prototype chain.
+        // Recurse through the prototype.
         var proto = value.proto;
         for (var name in proto.data) {
-            this._addSubtag(tag, name, proto.data[name], stack, true);
+            var subvalue = proto.data[name];
+            if (!subvalue.hidden) {
+                this._addSubtag(tag, name, subvalue, stack, true);
+            }
         }
     },
 
@@ -346,13 +357,16 @@ exports.Interpreter.prototype = {
             node.forEach(function(init) {
                 switch (init.type) {
                 case tokenIds.PROPERTY_INIT:
-                    data[init[0].value] = deref(exec(init[1]));
+                    var name = init[0].value;
+                    if (this._safeIdentifier(name)) {
+                        data[init[0].value] = deref(exec(init[1]));
+                    }
                     break;
 
                 default:
                     warn(node, "unsupported initializer: " + tokens[init.type]);
                 }
-            });
+            }, this);
             return { type: 'object', data: data, node: node };
 
         case tokenIds.IDENTIFIER:
@@ -416,6 +430,11 @@ exports.Interpreter.prototype = {
         return "/" + str.replace(/[\t*^$.~\\\/]/g, subst) + "/";
     },
 
+    // Make sure identifiers are safe (__proto__ and friends can kill us).
+    _safeIdentifier: function(name) {
+        return typeof(name) !== 'string' || name.indexOf("__") !== 0;
+    },
+
     _store: function(dest, src, ctx) {
         if (dest.type !== 'ref') {
             return;     // true behavior: ReferenceError
@@ -433,7 +452,7 @@ exports.Interpreter.prototype = {
                     warn(dest.node, "not storing because no setter is " +
                         "defined for property \"" + name + "\"");
                 }
-            } else {
+            } else if (this._safeIdentifier(name)) {
                 container.data[name] = src;
             }
         } else {
@@ -443,17 +462,18 @@ exports.Interpreter.prototype = {
 
     /** Discovers the tags in the Narcissus-produced AST. */
     interpret: function() {
-        var wnd = { hidden: true, type: 'object', data: {} };
-        wnd.data.window = wnd;
-
-        var ctx = { global: wnd, scope: { parent: null, object: wnd } };
+        var window = { hidden: true, type: 'object', data: {} };
+        window.data.window = window;
 
         var opts = this.opts;
-        var exports;
-        if (opts.commonJS) {
+        var ctx = { global: window, scope: { parent: null } };
+        
+        if (!opts.commonJS) {
+            ctx.scope.object = window;
+        } else {
             exports = { hidden: true, type: 'object', data: {} };
-            wnd.data.exports = exports;
-        }
+            ctx.scope.object = { type: 'object', data: { exports: exports } };
+        };
 
         this._exec(this.ast, ctx);
 
@@ -464,8 +484,8 @@ exports.Interpreter.prototype = {
                 scope = scope.parent;
             }
         } else {
-            this._addValue(wnd, {});
-            this._addValue(exports, { module: this.module });
+            this._addValue(window, {});
+            this._addValue(exports, { module: opts.module });
         }
     }
 };

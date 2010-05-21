@@ -46,15 +46,15 @@ exports.Tags = function() {
 };
 
 exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
-    add: function(src, file, options) {
-        if (options === null || options === undefined) {
-            options = {};
+    add: function(src, file, opts) {
+        if (opts === null || opts === undefined) {
+            opts = {};
         }
 
         var lines = src.split("\n");
         var ast = parse(src, file, 1);
 
-        var interp = new Interpreter(ast, file, lines, {});
+        var interp = new Interpreter(ast, file, lines, opts);
         interp.interpret();
         Array.prototype.push.apply(this.tags, interp.tags);
     }
