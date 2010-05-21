@@ -51,8 +51,12 @@ exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
             options = {};
         }
 
+        var lines = src.split("\n");
         var ast = parse(src, file, 1);
-        this.interpret(ast, file, {});
+
+        var interp = new Interpreter(ast, file, lines, {});
+        interp.interpret();
+        Array.prototype.push.apply(this.tags, interp.tags);
     }
-}), Interpreter, TagWriter));
+}), TagWriter));
 

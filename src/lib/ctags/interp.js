@@ -49,6 +49,8 @@ const INDEXED_TYPES  = { 'function': true, object: true };
 const LOADABLE_TYPES = { activation: true, 'function': true, object: true };
 const STORABLE_TYPES = { activation: true, 'function': true, object: true };
 
+const REGEX_ESCAPES = { "\t": "\\t" };
+
 function note(node, str) {
     puts(node.lineno + ":note: " + str);
 }
@@ -91,7 +93,15 @@ FunctionObject.prototype = {
     type: 'function'
 };
 
-exports.Interpreter = Trait({
+exports.Interpreter = function(ast, file, lines, opts) {
+    this.ast = ast;
+    this.file = file;
+    this.lines = lines;
+    this.opts = opts;
+    this.tags = [];
+};
+
+exports.Interpreter.prototype = {
     _addValue: function(value, baseTag, stack) {
         if (stack == null) {
             stack = [ value ];
@@ -107,7 +117,7 @@ exports.Interpreter = Trait({
         var node = value.node;
         if (node != null) {
             tag.tagfile = node.filename;
-            tag.addr = node.lineno; // TODO: regex instead
+            tag.addr = this._regexify(this.lines[node.lineno - 1]);
 
             if (!value.hidden && /^\S/.test(tag.name)) {
                 this.tags.push(tag);
@@ -335,6 +345,13 @@ exports.Interpreter = Trait({
         return { type: 'null', value: null };
     },
 
+    _regexify: function(str) {
+        function subst(ch) {
+            return (ch in REGEX_ESCAPES) ? REGEX_ESCAPES[ch] : "\\" + ch;
+        }
+        return "/" + str.replace(/[\t*^$.~\\\/]/g, subst) + "/";
+    },
+
     _store: function(dest, src, ctx) {
         if (dest.type !== 'ref') {
             return;     // true behavior: ReferenceError
@@ -348,20 +365,21 @@ exports.Interpreter = Trait({
         }
     },
 
-    /** Takes a Narcissus AST and discovers the tags in it. */
-    interpret: function(ast, module, opts) {
+    /** Discovers the tags in the Narcissus-produced AST. */
+    interpret: function() {
         var wnd = { hidden: true, type: 'object', value: {} };
         wnd.value.window = wnd;
 
         var ctx = { global: wnd, scope: { parent: null, object: wnd } };
 
+        var opts = this.opts;
         var exports;
         if (opts.commonJS) {
             exports = { hidden: true, type: 'object', value: {} };
             wnd.value.exports = exports;
         }
 
-        this._exec(ast, ctx, opts);
+        this._exec(this.ast, ctx);
 
         if (!opts.commonJS) {
             var scope = ctx.scope;
@@ -371,8 +389,8 @@ exports.Interpreter = Trait({
             }
         } else {
             this._addValue(wnd, {});
-            this._addValue(exports, { module: module });
+            this._addValue(exports, { module: this.module });
         }
     }
-});
+};
 
