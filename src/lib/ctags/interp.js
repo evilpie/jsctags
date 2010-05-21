@@ -102,16 +102,16 @@ exports.Interpreter = Trait({
         for (var tagfield in baseTag) {
             tag[tagfield] = baseTag[tagfield];
         }
+        tag.type = value.type;
+
         var node = value.node;
         if (node != null) {
             tag.tagfile = node.filename;
             tag.addr = node.lineno; // TODO: regex instead
-        }
 
-        tag.type = value.type;
-
-        if (!value.hidden) {
-            this.tags.push(tag);
+            if (!value.hidden && /^\S/.test(tag.name)) {
+                this.tags.push(tag);
+            }
         }
 
         if (!(value.type in INDEXED_TYPES)) {
@@ -137,10 +137,10 @@ exports.Interpreter = Trait({
 
     _deref: function(value) {
         if (value.type === 'ref') {
-            if (!(value.container.type in LOADABLE_TYPES)) {
+            if (!(value.container.type in LOADABLE_TYPES) ||
+                    !(value.name in value.container.value)) {
                 return this._getNullValue();
             }
-
             return value.container.value[value.name];
         }
         return value;
@@ -190,13 +190,15 @@ exports.Interpreter = Trait({
 
         case tokenIds.SCRIPT:
             node.funDecls.forEach(function(decl) {
+                var fn = new FunctionObject(this, decl, ctx.scope);
+                ctx.scope.object.value[decl.name] = fn;
+            }, this);
+            node.varDecls.forEach(function(decl) {
                 ctx.scope.object.value[decl.name] = {
                     node:   decl,
-                    value:  ctx.scope
+                    type:   'undefined',
+                    value:  null
                 };
-            });
-            node.varDecls.forEach(function(decl) {
-                ctx.scope.object.value[decl.name] = { node: decl, value: decl };
             });
 
             // FALL THROUGH
@@ -214,7 +216,7 @@ exports.Interpreter = Trait({
                 var name = decl.name;
                 var scope = ctx.scope;
                 while (scope != null) {
-                    if (scope.object.value.hasOwnProperty(name)) {
+                    if (Object.hasOwnProperty.call(scope.object.value, name)) {
                         break;
                     }
                     scope = scope.parent;
@@ -269,7 +271,7 @@ exports.Interpreter = Trait({
                 return this._getNullValue();
             }
 
-            var thisObject = (lhs.type === 'ref' ? r.base : null);
+            var thisObject = (lhs.type === 'ref' ? lhs.container : null);
             if (thisObject != null && thisObject.type === 'activation') {
                 thisObject = null;
             }
