@@ -42,7 +42,16 @@ var jsparse = require('narcissus/jsparse');
 var tokenIds = jsdefs.tokenIds, tokens = jsdefs.tokens;
 var Trait = require('traits').Trait;
 
-var puts = require('sys').puts;
+var sys = require('sys');
+var puts = sys.puts, inspect = sys.inspect;
+
+function note(node, str) {
+    puts(node.lineno + ":note: " + str);
+}
+
+function warn(node, str) {
+    puts(node.lineno + ":warn: " + str);
+}
 
 function FunctionObject(interp, node, scope) {
     this.interp = interp;
@@ -52,7 +61,14 @@ function FunctionObject(interp, node, scope) {
 
 FunctionObject.prototype = {
     call: function(thisObject, args) {
-        var ctx = { scope: { object: {}, parent: this.scope } };
+        var activation = { type: 'activation', value: {} };
+        var params = this.node.params;
+        for (var i = 0; i < args.value.length; i++) {
+            activation.value[this.node.params[i]] = args.value[i];
+        }
+        activation.value.arguments = activation;
+
+        var ctx = { scope: { object: activation, parent: this.scope } };
 
         try {
             this.interp._exec(this.node.body, ctx);
@@ -64,7 +80,7 @@ FunctionObject.prototype = {
             throw e;
         }
 
-        return undefined;
+        return { type: 'scalar', value: undefined };
     },
 
     type: 'function'
@@ -72,8 +88,12 @@ FunctionObject.prototype = {
 
 exports.Interpreter = Trait({
     _addDefs: function(defs, baseTag) {
-        for (var name in defs) {
-            var def = defs[name];
+        if (defs.type != 'object') {
+            return;
+        }
+
+        for (var name in defs.value) {
+            var def = defs.value[name];
             if (def.hidden || !('node' in def)) {
                 continue;
             }
@@ -103,13 +123,26 @@ exports.Interpreter = Trait({
         return val;
     },
 
+    _dumpScope: function(scope, i) {
+        if (i == null) {
+            i = 0;
+        }
+
+        puts("scope " + i + ":");
+        for (var key in scope.object.value) {
+            puts("var " + key + ";");
+        }
+
+        if (scope.parent != null) {
+            this._dumpScope(scope.parent, i + 1);
+        }
+    },
+
     _exec: function(node, ctx) {
         var self = this;
 
         function deref(val) { return self._deref(val); }
         function exec(node) { return self._exec(node, ctx); }
-
-        puts("executing node " + tokens[node.type] + " @ " + node.lineno);
 
         switch (node.type) {
         case tokenIds.FUNCTION:
@@ -120,24 +153,27 @@ exports.Interpreter = Trait({
             var isStatement = node.functionForm === jsparse.STATEMENT_FORM;
             if (node.name != null && !isStatement) {
                 // Introduce a new scope.
-                ctx.scope = { object: {}, parent: ctx.scope };
+                var scopeObj = { type: 'object', value: {} };
+                ctx.scope = { object: scopeObj, parent: ctx.scope };
             }
 
             var fn = new FunctionObject(this, node, ctx.scope);
 
             if (isStatement) {
-                ctx.scope.object[node.name] = fn;
+                ctx.scope.object.value[node.name] = fn;
             }
 
-            puts("returning fn " + fn);
             return fn;
 
         case tokenIds.SCRIPT:
             node.funDecls.forEach(function(decl) {
-                ctx.scope.object[decl.name] = { node: decl, value: ctx.scope };
+                ctx.scope.object.value[decl.name] = {
+                    node:   decl,
+                    value:  ctx.scope
+                };
             });
             node.varDecls.forEach(function(decl) {
-                ctx.scope.object[decl.name] = { node: decl, value: decl };
+                ctx.scope.object.value[decl.name] = { node: decl, value: decl };
             });
 
             // FALL THROUGH
@@ -145,14 +181,57 @@ exports.Interpreter = Trait({
             node.forEach(exec);
             break;
 
+        case tokenIds.VAR:  // TODO: const too
+            node.forEach(function(decl) {
+                var init = decl.initializer;
+                if (init == null) {
+                    return;
+                }
+
+                var name = decl.name;
+                var scope = ctx.scope;
+                while (scope != null) {
+                    if (scope.object.value.hasOwnProperty(name)) {
+                        break;
+                    }
+                    scope = scope.parent;
+                }
+
+                var value = deref(exec(init));
+                scope.object.value[name] = value;
+            }, this);
+            break;
+
         case tokenIds.SEMICOLON:
             if (node.expression != null) {
                 exec(node.expression);
             }
-            return;
+            break;
+
+        case tokenIds.ASSIGN:
+            // TODO: +=, -=, &c.
+            var lhs = exec(node[0]);
+            var rhs = deref(exec(node[1]));
+            this._store(lhs, rhs, ctx);
+            return rhs;
+
+        case tokenIds.DOT:
+            var lhs = exec(node[0]);
+            var container = deref(lhs);
+            if (typeof(container.value) !== 'object') {
+                return this._getNullValue();    // TODO: primitives, functions
+            }
+
+            var rhs = node[1].value;
+            return {
+                type: 'ref',
+                container: container,
+                name: node[1].value,
+                node: node
+            };
 
         case tokenIds.LIST:
-            var args = { node: node };
+            var args = { type: 'list', node: node };
             args.value = node.map(exec).map(deref);
             args.value.length = node.length;
             return args;
@@ -162,8 +241,8 @@ exports.Interpreter = Trait({
             var rhs = exec(node[1]);
             var fn = deref(lhs);
             if (fn.type !== 'function') {
-                puts("not a function");
-                return { type: 'scalar', value: null };
+                note(node, "not a function");
+                return this._getNullValue();
             }
 
             var thisObject = (lhs.type === 'ref' ? r.base : null);
@@ -171,17 +250,32 @@ exports.Interpreter = Trait({
                 thisObject = null;
             }
 
-            return fn.call(thisObject, args);
+            return fn.call(thisObject, rhs);
+
+        case tokenIds.OBJECT_INIT:
+            var value = {};
+            node.forEach(function(init) {
+                switch (init.type) {
+                case tokenIds.PROPERTY_INIT:
+                    value[init[0].value] = deref(exec(init[1]));
+                    break;
+
+                default:
+                    warn(node, "unsupported initializer: " + tokens[init.type]);
+                }
+            });
+            return { type: 'object', value: value, node: node };
 
         case tokenIds.IDENTIFIER:
             var scope = ctx.scope;
-            while (scope !== null) {
-                if (node.value in scope.object) {
+            while (scope != null) {
+                if (node.value in scope.object.value) {
                     break;
                 }
+                scope = scope.parent;
             }
 
-            var container = scope === null ? null : scope.object;
+            var container = scope === null ? null : scope.object.value;
             return {
                 type:       'ref',
                 container:  container,
@@ -189,34 +283,48 @@ exports.Interpreter = Trait({
                 node:       node
             };
 
+        case tokenIds.NUMBER:
+        case tokenIds.STRING:
+        case tokenIds.REGEXP:
+            return { type: 'scalar', value: node.value };
+
         case tokenIds.GROUP:
             return exec(node[0]);
 
         default:
-            puts("unknown token " + tokens[node.type] + " @ " + node.lineno);
-            return { type: 'scalar', value: null };
+            warn(node, "unknown token \"" + tokens[node.type] + "\"");
+            return this._getNullValue();
         }
+    },
+
+    _getNullValue: function() {
+        return { type: 'scalar', value: null };
+    },
+
+    _store: function(dest, src, ctx) {
+        if (dest.type !== 'ref') {
+            return;     // true behavior: ReferenceError
+        }
+
+        var container = dest.container != null ? dest.container : ctx.global;
+        container.value[dest.name] = src;
     },
 
     /** Takes a Narcissus AST and discovers the tags in it. */
     interpret: function(ast, module, opts) {
-        var exportsDefs, windowDefs = {};
+        var wnd = { hidden: true, type: 'object', value: {} };
+        wnd.value.window = wnd;
 
-        var ctx = {
-            scope: {
-                parent: null,
-                object: { window: { hidden: true, value: windowDefs } }
-            }
-        };
+        var ctx = { global: wnd, scope: { parent: null, object: wnd } };
 
+        var exports;
         if (opts.commonJS) {
-            exportsDefs = {};
-            ctx.scope.object.exports = { hidden: true, value: exportsDefs };
+            exports = { hidden: true, type: 'object', value: {} };
+            wnd.value.exports = exports;
         }
 
         this._exec(ast, ctx, opts);
 
-        this._addDefs(windowDefs, {});
         if (!opts.commonJS) {
             var scope = ctx.scope;
             while (scope !== null) {
@@ -224,7 +332,8 @@ exports.Interpreter = Trait({
                 scope = scope.parent;
             }
         } else {
-            this._addDefs(exportsDefs, { module: module });
+            this._addDefs(wnd, {});
+            this._addDefs(exports, { module: module });
         }
     }
 });
