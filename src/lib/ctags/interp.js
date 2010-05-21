@@ -64,6 +64,7 @@ function FunctionObject(interp, node, scope) {
     this.node = node;
     this.scope = scope;
     this.data = {};
+    this.proto = { type: 'object', data: {} };
 };
 
 FunctionObject.prototype = {
@@ -90,6 +91,13 @@ FunctionObject.prototype = {
         return { type: 'scalar', data: undefined };
     },
 
+    props: {
+        prototype: {
+            get: function() { return this.proto; },
+            set: function(newValue) { this.proto = newValue; }
+        }
+    },
+
     type: 'function'
 };
 
@@ -102,6 +110,34 @@ exports.Interpreter = function(ast, file, lines, opts) {
 };
 
 exports.Interpreter.prototype = {
+    _addSubtag: function(parentTag, name, value, stack, prototypeMember) {
+        if (stack.indexOf(value) !== -1) {
+            return;     // avoid cyclic structures
+        }
+
+        var tag = {};
+        tag.name = name;
+        if ('name' in parentTag) {  // Do we have a parent?
+            if ('class' in parentTag) {
+                // If one or more of our parents is getting assigned to a
+                // prototype, then we're part of a class.
+                tag['class'] = parentTag['class'] + "." + parentTag.name;
+            } else {
+                var path =  ('namespace' in parentTag)
+                            ? parentTag.namespace + "." + parentTag.name
+                            : parentTag.name;
+
+                if (prototypeMember) {
+                    tag['class'] = path;
+                } else {
+                    tag.namespace = path;
+                }
+            }
+        }
+
+        this._addValue(value, tag, stack.concat(value));
+    },
+
     _addValue: function(value, baseTag, stack) {
         if (stack == null) {
             stack = [ value ];
@@ -113,6 +149,7 @@ exports.Interpreter.prototype = {
             tag[tagfield] = baseTag[tagfield];
         }
         tag.type = value.type;
+        tag.kind = this._getTagKind(tag);
 
         var node = value.node;
         if (node != null) {
@@ -124,34 +161,51 @@ exports.Interpreter.prototype = {
             }
         }
 
+        // Stop here if there are no members of this value to consider.
         if (!(value.type in INDEXED_TYPES)) {
             return;
         }
 
-        for (var name in value.data) {
-            var subvalue = value.data[name];
-            if (stack.indexOf(subvalue) !== -1) {
-                continue;   // avoid cyclic structures
-            }
+        // Recurse through members.
+        var data = value.data;
+        for (var name in data) {
+            this._addSubtag(tag, name, data[name], stack, false);
+        }
 
-            var subtag = {};
-            subtag.name = name;
-            if ('name' in tag) {
-                var baseClass = ('class' in tag) ? tag['class'] + "." : "";
-                subtag['class'] = baseClass + tag.name;
-            }
+        // Stop here if there's no sane prototype.
+        if (value.type !== 'function' ||
+                !(value.proto.type in INDEXED_TYPES)) {
+            return;
+        }
 
-            this._addValue(subvalue, subtag, stack.concat(subvalue));
+        // Recurse through the prototype chain.
+        var proto = value.proto;
+        for (var name in proto.data) {
+            this._addSubtag(tag, name, proto.data[name], stack, true);
         }
     },
 
     _deref: function(value) {
         if (value.type === 'ref') {
-            if (!(value.container.type in LOADABLE_TYPES) ||
-                    !(value.name in value.container.data)) {
+            var name = value.name, container = value.container;
+            if (!(container.type in LOADABLE_TYPES) ||
+                    !(name in container.data)) {
                 return this._getNullValue();
             }
-            return value.container.data[value.name];
+
+            if ('props' in container && name in container.props) {
+                var prop = container.props[name];
+                if ('get' in prop) {
+                    return prop.get.call(container);
+                }
+
+                // true behavior: exception
+                warn(container.node, "returning null for get() because " +
+                    "no getter is defined for property \"" + name + "\"");
+                return this._getNullValue();
+            }
+
+            return container.data[name];
         }
         return value;
     },
@@ -340,6 +394,17 @@ exports.Interpreter.prototype = {
         }
     },
 
+    // Determines the kind of a tag from the tag data.
+    _getTagKind: function(tag) {
+        if (tag.type === 'function') {
+            return 'f';
+        }
+        if ('class' in tag || 'namespace' in tag) {
+            return 'm';
+        }
+        return 'v';
+    },
+
     _getNullValue: function() {
         return { type: 'null', data: null };
     },
@@ -357,8 +422,20 @@ exports.Interpreter.prototype = {
         }
 
         var container = dest.container != null ? dest.container : ctx.global;
+        var name = dest.name;
         if (container.type in STORABLE_TYPES) {
-            container.data[dest.name] = src;
+            if ('props' in container && name in container.props) {
+                var prop = container.props[name];
+                if ('set' in prop) {
+                    prop.set.call(container, src);
+                } else {
+                    // true behavior: exception
+                    warn(dest.node, "not storing because no setter is " +
+                        "defined for property \"" + name + "\"");
+                }
+            } else {
+                container.data[name] = src;
+            }
         } else {
             warn(dest.node, "not storing because type = " + container.type);
         }
