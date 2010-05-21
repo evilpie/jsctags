@@ -93,7 +93,7 @@ exports.TagWriter = Trait({
             buf.push(";\"");
 
             if (kind !== undefined) {
-                buf.push(kind);
+                buf.push("\t", kind);
             }
 
             tagfields.forEach(function(tagfield) {
