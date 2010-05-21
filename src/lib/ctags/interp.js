@@ -45,6 +45,10 @@ var Trait = require('traits').Trait;
 var sys = require('sys');
 var puts = sys.puts, inspect = sys.inspect;
 
+const INDEXED_TYPES  = { 'function': true, object: true };  
+const LOADABLE_TYPES = { activation: true, 'function': true, object: true };
+const STORABLE_TYPES = { activation: true, 'function': true, object: true };
+
 function note(node, str) {
     puts(node.lineno + ":note: " + str);
 }
@@ -57,6 +61,7 @@ function FunctionObject(interp, node, scope) {
     this.interp = interp;
     this.node = node;
     this.scope = scope;
+    this.value = {};
 };
 
 FunctionObject.prototype = {
@@ -109,7 +114,7 @@ exports.Interpreter = Trait({
             this.tags.push(tag);
         }
 
-        if (value.type !== 'object') {
+        if (!(value.type in INDEXED_TYPES)) {
             return;
         }
 
@@ -130,14 +135,15 @@ exports.Interpreter = Trait({
         }
     },
 
-    _deref: function(val) {
-        if (val.type === 'ref') {
-            if (val.container === undefined) {
-                return null;    // true behavior: ReferenceError
+    _deref: function(value) {
+        if (value.type === 'ref') {
+            if (!(value.container.type in LOADABLE_TYPES)) {
+                return this._getNullValue();
             }
-            return val.container[val.name];
+
+            return value.container.value[value.name];
         }
-        return val;
+        return value;
     },
 
     _dumpScope: function(scope, i) {
@@ -235,8 +241,9 @@ exports.Interpreter = Trait({
         case tokenIds.DOT:
             var lhs = exec(node[0]);
             var container = deref(lhs);
-            if (typeof(container.value) !== 'object') {
-                return this._getNullValue();    // TODO: primitives, functions
+            if (!(container.type in LOADABLE_TYPES)) {
+                warn(node, "container type " + container.type + " not loadable");
+                return this._getNullValue();    // TODO: primitives
             }
 
             var rhs = node[1].value;
@@ -292,13 +299,17 @@ exports.Interpreter = Trait({
                 scope = scope.parent;
             }
 
-            var container = scope === null ? null : scope.object.value;
-            return {
+            var container = (scope === null)
+                ? this._getNullValue()
+                : scope.object;
+
+            var rv = {
                 type:       'ref',
                 container:  container,
                 name:       node.value,
                 node:       node
             };
+            return rv;
 
         case tokenIds.NUMBER:
             return { type: 'number', value: node.value, node: node };
@@ -319,7 +330,7 @@ exports.Interpreter = Trait({
     },
 
     _getNullValue: function() {
-        return { type: 'scalar', value: null };
+        return { type: 'null', value: null };
     },
 
     _store: function(dest, src, ctx) {
@@ -328,7 +339,11 @@ exports.Interpreter = Trait({
         }
 
         var container = dest.container != null ? dest.container : ctx.global;
-        container.value[dest.name] = src;
+        if (container.type in STORABLE_TYPES) {
+            container.value[dest.name] = src;
+        } else {
+            warn(dest.node, "not storing because type = " + container.type);
+        }
     },
 
     /** Takes a Narcissus AST and discovers the tags in it. */

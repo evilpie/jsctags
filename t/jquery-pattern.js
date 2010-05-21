@@ -15,6 +15,8 @@
         return 42;
     };
 
+    myQuery.boo.foo = 12;
+
     wnd.$ = wnd.myQuery = myQuery;
 })(window);
 
