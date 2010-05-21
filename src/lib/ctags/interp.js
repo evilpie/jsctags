@@ -63,17 +63,17 @@ function FunctionObject(interp, node, scope) {
     this.interp = interp;
     this.node = node;
     this.scope = scope;
-    this.value = {};
+    this.data = {};
 };
 
 FunctionObject.prototype = {
     call: function(thisObject, args) {
-        var activation = { type: 'activation', value: {} };
+        var activation = { type: 'activation', data: {} };
         var params = this.node.params;
-        for (var i = 0; i < args.value.length; i++) {
-            activation.value[this.node.params[i]] = args.value[i];
+        for (var i = 0; i < args.data.length; i++) {
+            activation.data[this.node.params[i]] = args.data[i];
         }
-        activation.value.arguments = activation;
+        activation.data.arguments = activation;
 
         var ctx = { scope: { object: activation, parent: this.scope } };
 
@@ -87,7 +87,7 @@ FunctionObject.prototype = {
             throw e;
         }
 
-        return { type: 'scalar', value: undefined };
+        return { type: 'scalar', data: undefined };
     },
 
     type: 'function'
@@ -128,8 +128,8 @@ exports.Interpreter.prototype = {
             return;
         }
 
-        for (var name in value.value) {
-            var subvalue = value.value[name];
+        for (var name in value.data) {
+            var subvalue = value.data[name];
             if (stack.indexOf(subvalue) !== -1) {
                 continue;   // avoid cyclic structures
             }
@@ -148,10 +148,10 @@ exports.Interpreter.prototype = {
     _deref: function(value) {
         if (value.type === 'ref') {
             if (!(value.container.type in LOADABLE_TYPES) ||
-                    !(value.name in value.container.value)) {
+                    !(value.name in value.container.data)) {
                 return this._getNullValue();
             }
-            return value.container.value[value.name];
+            return value.container.data[value.name];
         }
         return value;
     },
@@ -162,7 +162,7 @@ exports.Interpreter.prototype = {
         }
 
         puts("scope " + i + ":");
-        for (var key in scope.object.value) {
+        for (var key in scope.object.data) {
             puts("var " + key + ";");
         }
 
@@ -186,14 +186,14 @@ exports.Interpreter.prototype = {
             var isStatement = node.functionForm === jsparse.STATEMENT_FORM;
             if (node.name != null && !isStatement) {
                 // Introduce a new scope.
-                var scopeObj = { type: 'object', value: {} };
+                var scopeObj = { type: 'object', data: {} };
                 ctx.scope = { object: scopeObj, parent: ctx.scope };
             }
 
             var fn = new FunctionObject(this, node, ctx.scope);
 
             if (isStatement) {
-                ctx.scope.object.value[node.name] = fn;
+                ctx.scope.object.data[node.name] = fn;
             }
 
             return fn;
@@ -201,13 +201,13 @@ exports.Interpreter.prototype = {
         case tokenIds.SCRIPT:
             node.funDecls.forEach(function(decl) {
                 var fn = new FunctionObject(this, decl, ctx.scope);
-                ctx.scope.object.value[decl.name] = fn;
+                ctx.scope.object.data[decl.name] = fn;
             }, this);
             node.varDecls.forEach(function(decl) {
-                ctx.scope.object.value[decl.name] = {
+                ctx.scope.object.data[decl.name] = {
                     node:   decl,
                     type:   'undefined',
-                    value:  null
+                    data:   null
                 };
             });
 
@@ -226,14 +226,14 @@ exports.Interpreter.prototype = {
                 var name = decl.name;
                 var scope = ctx.scope;
                 while (scope != null) {
-                    if (Object.hasOwnProperty.call(scope.object.value, name)) {
+                    if (Object.hasOwnProperty.call(scope.object.data, name)) {
                         break;
                     }
                     scope = scope.parent;
                 }
 
                 var value = deref(exec(init));
-                scope.object.value[name] = value;
+                scope.object.data[name] = value;
             }, this);
             break;
 
@@ -258,7 +258,6 @@ exports.Interpreter.prototype = {
                 return this._getNullValue();    // TODO: primitives
             }
 
-            var rhs = node[1].value;
             return {
                 type: 'ref',
                 container: container,
@@ -268,8 +267,8 @@ exports.Interpreter.prototype = {
 
         case tokenIds.LIST:
             var args = { type: 'list', node: node };
-            args.value = node.map(exec).map(deref);
-            args.value.length = node.length;
+            args.data = node.map(exec).map(deref);
+            args.data.length = node.length;
             return args;
 
         case tokenIds.CALL:
@@ -289,23 +288,23 @@ exports.Interpreter.prototype = {
             return fn.call(thisObject, rhs);
 
         case tokenIds.OBJECT_INIT:
-            var value = {};
+            var data = {};
             node.forEach(function(init) {
                 switch (init.type) {
                 case tokenIds.PROPERTY_INIT:
-                    value[init[0].value] = deref(exec(init[1]));
+                    data[init[0].value] = deref(exec(init[1]));
                     break;
 
                 default:
                     warn(node, "unsupported initializer: " + tokens[init.type]);
                 }
             });
-            return { type: 'object', value: value, node: node };
+            return { type: 'object', data: data, node: node };
 
         case tokenIds.IDENTIFIER:
             var scope = ctx.scope;
             while (scope != null) {
-                if (node.value in scope.object.value) {
+                if (node.value in scope.object.data) {
                     break;
                 }
                 scope = scope.parent;
@@ -324,13 +323,13 @@ exports.Interpreter.prototype = {
             return rv;
 
         case tokenIds.NUMBER:
-            return { type: 'number', value: node.value, node: node };
+            return { type: 'number', data: node.value, node: node };
 
         case tokenIds.STRING:
-            return { type: 'string', value: node.value, node: node };
+            return { type: 'string', data: node.value, node: node };
 
         case tokenIds.REGEXP:
-            return { type: 'regexp', value: node.value, node: node };
+            return { type: 'regexp', data: node.value, node: node };
 
         case tokenIds.GROUP:
             return exec(node[0]);
@@ -342,7 +341,7 @@ exports.Interpreter.prototype = {
     },
 
     _getNullValue: function() {
-        return { type: 'null', value: null };
+        return { type: 'null', data: null };
     },
 
     _regexify: function(str) {
@@ -359,7 +358,7 @@ exports.Interpreter.prototype = {
 
         var container = dest.container != null ? dest.container : ctx.global;
         if (container.type in STORABLE_TYPES) {
-            container.value[dest.name] = src;
+            container.data[dest.name] = src;
         } else {
             warn(dest.node, "not storing because type = " + container.type);
         }
@@ -367,16 +366,16 @@ exports.Interpreter.prototype = {
 
     /** Discovers the tags in the Narcissus-produced AST. */
     interpret: function() {
-        var wnd = { hidden: true, type: 'object', value: {} };
-        wnd.value.window = wnd;
+        var wnd = { hidden: true, type: 'object', data: {} };
+        wnd.data.window = wnd;
 
         var ctx = { global: wnd, scope: { parent: null, object: wnd } };
 
         var opts = this.opts;
         var exports;
         if (opts.commonJS) {
-            exports = { hidden: true, type: 'object', value: {} };
-            wnd.value.exports = exports;
+            exports = { hidden: true, type: 'object', data: {} };
+            wnd.data.exports = exports;
         }
 
         this._exec(this.ast, ctx);
