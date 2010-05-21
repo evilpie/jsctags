@@ -87,29 +87,46 @@ FunctionObject.prototype = {
 };
 
 exports.Interpreter = Trait({
-    _addDefs: function(defs, baseTag) {
-        if (defs.type != 'object') {
+    _addValue: function(value, baseTag, stack) {
+        if (stack == null) {
+            stack = [ value ];
+        }
+
+        // Create the tag.
+        var tag = {};
+        for (var tagfield in baseTag) {
+            tag[tagfield] = baseTag[tagfield];
+        }
+        var node = value.node;
+        if (node != null) {
+            tag.tagfile = node.filename;
+            tag.addr = node.lineno; // TODO: regex instead
+        }
+
+        tag.type = value.type;
+
+        if (!value.hidden) {
+            this.tags.push(tag);
+        }
+
+        if (value.type !== 'object') {
             return;
         }
 
-        for (var name in defs.value) {
-            var def = defs.value[name];
-            if (def.hidden || !('node' in def)) {
-                continue;
+        for (var name in value.value) {
+            var subvalue = value.value[name];
+            if (stack.indexOf(subvalue) !== -1) {
+                continue;   // avoid cyclic structures
             }
 
-            var tag = {};
-            for (var tagfield in baseTag) {
-                tag[tagfield] = baseTag[tagfield];
+            var subtag = {};
+            subtag.name = name;
+            if ('name' in tag) {
+                var baseClass = ('class' in tag) ? tag['class'] + "." : "";
+                subtag['class'] = baseClass + tag.name;
             }
 
-            tag.name = name;
-
-            var node = def.node;
-            tag.tagfile = node.filename;
-            tag.addr = node.lineno; // TODO: regex instead
-
-            this.tags.push(tag);
+            this._addValue(subvalue, subtag, stack.concat(subvalue));
         }
     },
 
@@ -284,9 +301,13 @@ exports.Interpreter = Trait({
             };
 
         case tokenIds.NUMBER:
+            return { type: 'number', value: node.value, node: node };
+
         case tokenIds.STRING:
+            return { type: 'string', value: node.value, node: node };
+
         case tokenIds.REGEXP:
-            return { type: 'scalar', value: node.value };
+            return { type: 'regexp', value: node.value, node: node };
 
         case tokenIds.GROUP:
             return exec(node[0]);
@@ -328,12 +349,12 @@ exports.Interpreter = Trait({
         if (!opts.commonJS) {
             var scope = ctx.scope;
             while (scope !== null) {
-                this._addDefs(scope.object, {});
+                this._addValue(scope.object, {});
                 scope = scope.parent;
             }
         } else {
-            this._addDefs(wnd, {});
-            this._addDefs(exports, { module: module });
+            this._addValue(wnd, {});
+            this._addValue(exports, { module: module });
         }
     }
 });
