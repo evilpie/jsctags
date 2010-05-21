@@ -70,17 +70,11 @@ exports.TagWriter = Trait({
     },
 
     write: function(stream) {
-        var tags = this.tags;
-        tags.sort(function(a, b) { return a.name.localeCompare(b.name); });
-
-        tags.forEach(function(tag) {
-            stream.write(tag.name);
-            stream.write("\t");
-            stream.write(tag.tagfile);
-            stream.write("\t");
+        var lines = this.tags.map(function(tag) {
+            var buf = [ tag.name, "\t", tag.tagfile, "\t" ];
 
             var addr = tag.addr;
-            stream.write(addr !== undefined ? addr : "//");
+            buf.push(addr !== undefined ? addr : "//");
 
             var tagfields = [];
             for (var key in tag) {
@@ -92,27 +86,28 @@ exports.TagWriter = Trait({
 
             var kind = tag.kind;
             if (kind === undefined && tagfields.length === 0) {
-                stream.write("\n");
-                return;
+                buf.push("\n");
+                return buf.join("");
             }
 
-            stream.write(";\"");
+            buf.push(";\"");
 
             if (kind !== undefined) {
-                stream.write(kind);
+                buf.push(kind);
             }
 
             tagfields.forEach(function(tagfield) {
-                stream.write("\t");
-                stream.write(tagfield);
-                stream.write(":");
+                buf.push("\t", tagfield, ":");
 
                 var escape = function(str) { return ESCAPES[str]; };
-                stream.write(tag[tagfield].replace("[\\\n\r\t]", escape));
+                buf.push(tag[tagfield].replace("[\\\n\r\t]", escape));
             });
 
-            stream.write("\n");
+            buf.push("\n");
+            return buf.join("");
         });
+
+        lines.sort().forEach(function(line) { stream.write(line); });
     }
 });
 
