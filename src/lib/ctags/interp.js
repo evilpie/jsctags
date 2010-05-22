@@ -427,7 +427,7 @@ exports.Interpreter.prototype = {
         function subst(ch) {
             return (ch in REGEX_ESCAPES) ? REGEX_ESCAPES[ch] : "\\" + ch;
         }
-        return "/" + str.replace(/[\t*^$.~\\\/]/g, subst) + "/";
+        return "/^" + str.replace(/[\t*^$.~\\\/]/g, subst) + "$/";
     },
 
     // Make sure identifiers are safe (__proto__ and friends can kill us).
