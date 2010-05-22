@@ -49,7 +49,7 @@ const INDEXED_TYPES  = { 'function': true, object: true };
 const LOADABLE_TYPES = { activation: true, 'function': true, object: true };
 const STORABLE_TYPES = { activation: true, 'function': true, object: true };
 
-const REGEX_ESCAPES = { "\t": "\\t" };
+const REGEX_ESCAPES = { "\n": "\\n", "\r": "\\r", "\t": "\\t" };
 
 function note(node, str) {
     puts(node.lineno + ":note: " + str);
@@ -427,7 +427,7 @@ exports.Interpreter.prototype = {
         function subst(ch) {
             return (ch in REGEX_ESCAPES) ? REGEX_ESCAPES[ch] : "\\" + ch;
         }
-        return "/^" + str.replace(/[\t*^$.~\\\/]/g, subst) + "$/";
+        return "/^" + str.replace(/[\\/$\n\r\t]/g, subst) + "$/";
     },
 
     // Make sure identifiers are safe (__proto__ and friends can kill us).

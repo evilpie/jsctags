@@ -6,7 +6,7 @@ var bar = function() {
     return y;
 };
 
-function baz() {
+function baz() { // foo
     return z;
 }
 
