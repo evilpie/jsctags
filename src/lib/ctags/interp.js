@@ -37,8 +37,10 @@
 
 // Abstract interpreter, based on Narcissus.
 
+var _ = require('underscore')._;
 var jsdefs = require('narcissus/jsdefs');
 var jsparse = require('narcissus/jsparse');
+var nativeFns = require('./nativefn').nativeFns;
 var tokenIds = jsdefs.tokenIds, tokens = jsdefs.tokens;
 var Trait = require('traits').Trait;
 
@@ -57,6 +59,10 @@ function note(node, str) {
 
 function warn(node, str) {
     puts(node.lineno + ":warn: " + str);
+}
+
+function error(node, str) {
+    puts(node.lineno + ":error: " + str);
 }
 
 function FunctionObject(interp, node, scope) {
@@ -199,25 +205,34 @@ exports.Interpreter.prototype = {
     _deref: function(value) {
         if (value.type === 'ref') {
             var name = value.name, container = value.container;
-            if (!(container.type in LOADABLE_TYPES) ||
-                    !(name in container.data)) {
-                return this._getNullValue();
-            }
 
-            if ('props' in container && name in container.props) {
+            var result;
+            if (!(container.type in LOADABLE_TYPES)) {
+                result = this.getNullValue();
+            } else if ('props' in container && name in container.props) {
                 var prop = container.props[name];
                 if ('get' in prop) {
-                    return prop.get.call(container);
+                    result = prop.get.call(container);
+                } else {
+                    // true behavior: exception
+                    warn(container.node, "returning null for get() because " +
+                        "no getter is defined for property \"" + name + "\"");
+                    result = this.getNullValue();
                 }
-
-                // true behavior: exception
-                warn(container.node, "returning null for get() because " +
-                    "no getter is defined for property \"" + name + "\"");
-                return this._getNullValue();
+            } else if (!(name in container.data)) {
+                result = this.getNullValue();
+            } else {
+                result = container.data[name];
             }
 
-            return container.data[name];
+            if (nativeFns.hasOwnProperty(name)) {
+                result = _.clone(result);
+                result.nativeFn = nativeFns[name];
+            }
+
+            return result;
         }
+
         return value;
     },
 
@@ -318,15 +333,11 @@ exports.Interpreter.prototype = {
         case tokenIds.DOT:
             var lhs = exec(node[0]);
             var container = deref(lhs);
-            if (!(container.type in LOADABLE_TYPES)) {
-                warn(node, "container type " + container.type + " not loadable");
-                return this._getNullValue();    // TODO: primitives
-            }
-
+            var name = node[1].value;
             return {
                 type: 'ref',
                 container: container,
-                name: node[1].value,
+                name: name,
                 node: node
             };
 
@@ -339,18 +350,28 @@ exports.Interpreter.prototype = {
         case tokenIds.CALL:
             var lhs = exec(node[0]);
             var rhs = exec(node[1]);
-            var fn = deref(lhs);
-            if (fn.type !== 'function') {
-                note(node, "not a function");
-                return this._getNullValue();
-            }
 
             var thisObject = (lhs.type === 'ref' ? lhs.container : null);
             if (thisObject != null && thisObject.type === 'activation') {
                 thisObject = null;
             }
 
+            var fn = deref(lhs);
+            if ('nativeFn' in fn) {
+                return fn.nativeFn(this, ctx, thisObject, rhs);
+            }
+
+            if (fn.type !== 'function') {
+                note(node, "not a function");
+                return this.getNullValue();
+            }
+
             return fn.call(thisObject, rhs);
+
+        case tokenIds.NEW:
+        case tokenIds.NEW_WITH_ARGS:
+            // Just enough to allow subclassing to work. 
+            return { type: 'object', data: {}, node: node };
 
         case tokenIds.OBJECT_INIT:
             var data = {};
@@ -379,14 +400,15 @@ exports.Interpreter.prototype = {
             }
 
             var container = (scope === null)
-                ? this._getNullValue()
+                ? this.getNullValue()
                 : scope.object;
 
+            var name = node.value;
             var rv = {
-                type:       'ref',
-                container:  container,
-                name:       node.value,
-                node:       node
+                type: 'ref',
+                container: container,
+                name: name,
+                node: node
             };
             return rv;
 
@@ -404,7 +426,7 @@ exports.Interpreter.prototype = {
 
         default:
             warn(node, "unknown token \"" + tokens[node.type] + "\"");
-            return this._getNullValue();
+            return this.getNullValue();
         }
     },
 
@@ -417,10 +439,6 @@ exports.Interpreter.prototype = {
             return 'm';
         }
         return 'v';
-    },
-
-    _getNullValue: function() {
-        return { type: 'null', data: null };
     },
 
     _regexify: function(str) {
@@ -441,23 +459,34 @@ exports.Interpreter.prototype = {
         }
 
         var container = dest.container != null ? dest.container : ctx.global;
+        this.coerceToStorable(container, ctx);
+
         var name = dest.name;
-        if (container.type in STORABLE_TYPES) {
-            if ('props' in container && name in container.props) {
-                var prop = container.props[name];
-                if ('set' in prop) {
-                    prop.set.call(container, src);
-                } else {
-                    // true behavior: exception
-                    warn(dest.node, "not storing because no setter is " +
-                        "defined for property \"" + name + "\"");
-                }
-            } else if (this._safeIdentifier(name)) {
-                container.data[name] = src;
+        if ('props' in container && name in container.props) {
+            var prop = container.props[name];
+            if ('set' in prop) {
+                prop.set.call(container, src);
+            } else {
+                // true behavior: exception
+                warn(dest.node, "not storing because no setter is " +
+                    "defined for property \"" + name + "\"");
             }
-        } else {
-            warn(dest.node, "not storing because type = " + container.type);
+        } else if (this._safeIdentifier(name)) {
+            container.data[name] = src;
         }
+    },
+
+    coerceToStorable: function(value, ctx) {
+        if (value.type in STORABLE_TYPES) {
+            return;
+        }
+
+        value.type = 'object';
+        value.data = {};
+    },
+
+    getNullValue: function() {
+        return { type: 'null', data: null };
     },
 
     /** Discovers the tags in the Narcissus-produced AST. */
