@@ -1,0 +1,52 @@
+{
+    "name": "ctags",
+    "description": "Intelligent code indexing for JavaScript",
+    "version": "0.1.0",
+    "keywords": [ "ctags", "tags" ],
+    "maintainers": [
+        {
+            "name": "Patrick Walton",
+            "email": "pwalton@mozilla.com",
+            "web": "http://pcwalton.blogspot.com/"
+        }
+    ],
+    "contributors": [
+        {
+            "name": "Patrick Walton",
+            "email": "pwalton@mozilla.com",
+            "web": "http://pcwalton.blogspot.com/"
+        }
+    ],
+    "bugs": "http://github.com/pcwalton/jsctags/issues",
+    "licenses": [
+        {
+            "type": "MPL",
+            "url": "http://www.mozilla.org/MPL/MPL-1.1.html"
+        },
+        {
+            "type": "GPLv2",
+            "url": "http://www.gnu.org/licenses/gpl-2.0.html"
+        },
+        {
+            "type": "LGPLv2.1",
+            "url": "http://www.gnu.org/licenses/lgpl-2.1.html"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git://github.com/pcwalton/jsctags.git"
+        }
+    ],
+    "dependencies": {},
+    "homepage": "http://github.com/pcwalton/jsctags/",
+    "engine": [ "node" ],
+    "directories": [ "bin", "lib", "test" ],
+    "implements": [ "CommonJS/Modules/1.0" ],
+    "scripts": {
+        "install": "install.js",
+        "serve": "serve.js",
+        "uninstall": "uninstall.js"
+    }
+}
+

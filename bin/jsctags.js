@@ -38,7 +38,8 @@
 
 var argv = process.argv;
 var path = require('path');
-require.paths.unshift(path.join(path.dirname(argv[1]), '..', 'src', 'lib'));
+require.paths.unshift(path.join(path.dirname(argv[1]), "..", "lib",
+    "jsctags"));
 
 var _ = require('underscore')._;
 var fs = require('fs');

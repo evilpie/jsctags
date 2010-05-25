@@ -45,53 +45,25 @@ tiki.register('::narcissus', {
         {
             id:     'narcissus:index',
             name:   'index',
-            url:    "lib/narcissus/index.js",
+            url:    "../lib/jsctags/narcissus/index.js",
             type:   'script'
         },
         {
             id:     'narcissus:jsdefs',
             name:   'jsdefs.js',
-            url:    "lib/narcissus/jsdefs.js",
+            url:    "../lib/jsctags/narcissus/jsdefs.js",
             type:   'script'
         },
         {
             id:     'narcissus:jslex',
             name:   'jslex.js',
-            url:    "lib/narcissus/jslex.js",
+            url:    "../lib/jsctags/narcissus/jslex.js",
             type:   'script'
         },
         {
             id:     'narcissus:jsparse',
             name:   'jsparse.js',
-            url:    "lib/narcissus/jsparse.js",
-            type:   'script'
-        }
-    ]
-});
-
-tiki.register('::ctags', {
-    name:           'ctags',
-    version:        "0.0.0",
-    dependencies:   {
-        narcissus:  "0.0.0"
-    },
-    'tiki:resources': [
-        {
-            id:     'ctags:',
-            name:   'index.js',
-            url:    "lib/ctags/index.js",
-            type:   'script'
-        },
-        {
-            id:     'ctags:reader',
-            name:   'reader.js',
-            url:    "lib/ctags/reader.js",
-            type:   'script'
-        },
-        {
-            id:     'ctags:writer',
-            name:   'writer.js',
-            url:    "lib/ctags/writer.js",
+            url:    "../lib/jsctags/narcissus/jsparse.js",
             type:   'script'
         }
     ]
