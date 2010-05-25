@@ -1,24 +1,59 @@
+Overview
+--------
+jsctags is a [ctags] [1]-compatible code indexing solution for JavaScript. Its
+interface and output are essentially identical to [Exuberant Ctags] [2], but,
+instead of simply parsing the JavaScript, jsctags uses a simple form of
+abstract interpretation to determine which symbols are exported. This allows
+jsctags to achieve much better results than Exuberant Ctags. Popular libraries
+such as jQuery and CommonJS modules can now be meaningfully indexed.
+
+You can use jsctags to create `tags` files that are usable in many editors,
+from Vim to TextMate (via the [CodeBrowser] [3] plugin). jsctags is slated to
+become a key component of the [Bespin] [4] IDE, where it will be used to
+provide code completion.
+
+jsctags is written entirely in JavaScript, using CommonJS modules, the
+[node.js] [5] framework, and the [Narcissus] [6] engine.
+
+License
+-------
+jsctags is tri-licensed under the Mozilla Public License 1.1, the GNU General
+Public License 2.0, and the GNU Lesser General Public License 2.1.
+
 Requirements
 ------------
 * node.js
+* `make`
+
+Building
+--------
+To install:
+* `make install`
+
+To uninstall:
+* `make uninstall`
+
+To play with Narcissus' parser:
+* `make serve`
+* Navigate to [`http://localhost:8080/html/parser.html`] [parser].
 
 Directory structure
 -------------------
-
-The directory structure is somewhat unusual, in order to work around the
-restrictive security policies in modern browsers for `file:` URIs.
-
+The directory structure mostly follows the CommonJS packaging scheme:
 * `bin/`: tools runnable from node.js (should be directly executable in Unix)
-* `src/`: tools runnable in a browser
-* `src/js/`: non-CommonJS-compliant libraries, mostly for the browser tools
-* `src/lib/`: CommonJS-compliant libraries
+* `html/`: in-browser demo files
+* `js/`: support files for the HTML demos
+* `lib/`: CommonJS-compliant library files
+* `lib/ctags/`: the core jsctags code
+* `lib/narcissus/`: the Narcissus engine
+* `test/`: test cases for the indexer
 
-Known issues
-------------
+[1]: http://en.wikipedia.org/wiki/Ctags
+[2]: http://ctags.sourceforge.net/
+[3]: http://www.cocoabits.com/TmCodeBrowser/
+[4]: http://mozillalabs.com/bespin/
+[5]: http://nodejs.org/
+[6]: http://mxr.mozilla.org/mozilla/source/js/narcissus/
 
-* ECMAScript 5 is not supported (patches for Narcissus welcome!)
-* Browser tools require a Web server to run in Chrome, due to [Chrome bug 40787]
-  [1]
-
-[1]: http://code.google.com/p/chromium/issues/detail?id=40787
+[parser]: http://localhost:8080/html/parser.html
 
