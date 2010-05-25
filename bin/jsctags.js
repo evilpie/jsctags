@@ -96,7 +96,7 @@ function getModuleInfo(fullPath) {
     }
 
     var dir = path.dirname(fullPath);
-    var i = 0, libPath = null;
+    var i = 0, lastPath = null, libPath = null;
     while (true) {
         var p, st;
         try {
@@ -106,6 +106,11 @@ function getModuleInfo(fullPath) {
         } catch (e) {
             break;
         }
+
+        if (p === lastPath) {
+            break;
+        }
+        lastPath = p;
 
         var metadataPath = path.join(p, "package.json");
         try {
@@ -161,9 +166,10 @@ function processPath(p) {
             tags.add(data, p, getModuleInfo(p));
         } catch (e) {
             if ('lineNumber' in e) {
-                sys.puts("at line " + e.lineNumber + ":");
+                sys.puts("error:" + p + ":" + e.lineNumber + ": " + e);
+            } else {
+                throw e;
             }
-            throw e;
         }
     }
 }
