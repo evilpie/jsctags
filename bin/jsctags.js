@@ -53,6 +53,7 @@ function usage() {
     sys.puts("usage: jsctags [options] path0 [.. pathN]");
     sys.puts("options:");
     sys.puts("    -h, --help            display this usage info");
+    sys.puts("    -o, --output file     place output in the given file");
     sys.puts("    -L, --libroot dir     add a CommonJS module root (like " +
         "require.paths)")
     sys.puts("    -W, --warning level   set log level (debug/info/warn/" +
@@ -62,7 +63,7 @@ function usage() {
 
 var opts;
 try {
-    opts = getopt("help|h", "libroot|L=s@", "warning|W=s");
+    opts = getopt("help|h", "libroot|L=s@", "output|o=s", "warning|W=s");
 } catch (e) {
     sys.puts(e);
     usage();
@@ -191,7 +192,7 @@ for (var i = 0; i < pathCount; i++) {
     processPath(argv[i + 2], false, "", "");
 }
 
-var out = fs.createWriteStream("tags");
+var out = fs.createWriteStream(('output' in opts) ? opts.output : "tags");
 tags.write(out);
 out.end();
 
