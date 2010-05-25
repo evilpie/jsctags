@@ -43,6 +43,7 @@ To play with Narcissus' parser:
 Directory structure
 -------------------
 The directory structure mostly follows the CommonJS packaging scheme:
+
 * `bin/`: tools runnable from node.js (should be directly executable in Unix)
 * `html/`: in-browser demo files
 * `js/`: support files for the HTML demos
