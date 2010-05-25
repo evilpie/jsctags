@@ -390,7 +390,7 @@ exports.Tokenizer.prototype = {
             this.tokens[this.tokenIndex] = token = {};
 
         var input = this.source;
-        if (this.cursor === input.length)
+        if (this.cursor >= input.length)
             return token.type = END;
 
         token.start = this.cursor;
