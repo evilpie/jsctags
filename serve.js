@@ -37,7 +37,18 @@
  * ***** END LICENSE BLOCK ***** */
 
 require.paths.unshift('./lib/jsctags');
-var antinode = require('antinode');
+var http = require('http'), paperboy = require('paperboy');
+var sys = require('sys');
 
-antinode.start({ port: 8080, default_host: { root: "." } });
+http.createServer(function(req, resp) {
+	paperboy.deliver(__dirname, req, resp).
+		error(function(code, msg) {
+			resp.writeHead(code, { "Content-type": "text/plain" });
+			resp.close();
+		}).
+		otherwise(function(err) {
+			resp.writeHead(404, { "Content-type": "text/plain" });
+			resp.close();
+		});
+}).listen(8080);
 
