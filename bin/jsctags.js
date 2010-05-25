@@ -46,6 +46,7 @@ var fs = require('fs');
 var sys = require('sys');
 var ctags = require('ctags');
 var getopt = require('getopt').getopt;
+var log = require('log');
 var Tags = ctags.Tags;
 
 function usage() {
@@ -54,12 +55,14 @@ function usage() {
     sys.puts("    -h, --help            display this usage info");
     sys.puts("    -L, --libroot dir     add a CommonJS module root (like " +
         "require.paths)")
+    sys.puts("    -W, --warning level   set log level (debug/info/warn/" +
+        "error, default error)");
     process.exit(1);
 }
 
 var opts;
 try {
-    opts = getopt("help|h", "libroot|L=s@");
+    opts = getopt("help|h", "libroot|L=s@", "warning|W=s");
 } catch (e) {
     sys.puts(e);
     usage();
@@ -68,6 +71,15 @@ try {
 var pathCount = argv.length - 2;
 if (opts.help || pathCount === 0) {
     usage();
+}
+
+if (opts.warning) {
+    var level = opts.warning.toUpperCase();
+    if (!log.levels.hasOwnProperty(level)) {
+        sys.puts("no such logging level: \"" + opts.warning + "\"");
+        usage();
+    }
+    log.level = log.levels[level];
 }
 
 function idFor(st) {
