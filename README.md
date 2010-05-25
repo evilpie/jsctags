@@ -28,12 +28,15 @@ Requirements
 Building
 --------
 To install:
+
 * `make install`
 
 To uninstall:
+
 * `make uninstall`
 
 To play with Narcissus' parser:
+
 * `make serve`
 * Navigate to [`http://localhost:8080/html/parser.html`] [parser].
 
