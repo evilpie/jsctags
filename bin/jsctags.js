@@ -40,6 +40,7 @@ var argv = process.argv;
 var path = require('path');
 require.paths.unshift(path.join(path.dirname(argv[1]), '..', 'src', 'lib'));
 
+var _ = require('underscore')._;
 var fs = require('fs');
 var sys = require('sys');
 var ctags = require('ctags');
@@ -68,100 +69,96 @@ if (opts.help || pathCount === 0) {
     usage();
 }
 
+function idFor(st) {
+    return st.dev + "," + st.ino;
+}
+
 var librootIds = {};
 if ('libroot' in opts) {
     opts.libroot.forEach(function(libroot) {
         var st = fs.statSync(libroot);
-        var id = st.dev + "," + st.ino;
-        librootIds[id] = true;
+        librootIds[idFor(st)] = true;
     });
 }
 
 var tags = new Tags();
 
+// Ascend the directory hierarchy to find the CommonJS package this module is
+// in, if any.
+function getModuleInfo(fullPath) {
+    function commonJS(modulePath, packageId) {
+        var ext = path.extname(modulePath), len = modulePath.length;
+        var modulePart = modulePath.substring(0, len - ext.length);
+        var moduleId = (packageId != null)
+                       ? packageId + ":" + modulePart
+                       : modulePart;
+        return { commonJS: true, module: moduleId };
+    }
+
+    var dir = path.dirname(fullPath);
+    var i = 0, libPath = null;
+    while (true) {
+        var p, st;
+        try {
+            p = dir;
+            _(i).times(function() { p = path.dirname(p); });
+            st = fs.statSync(p);
+        } catch (e) {
+            break;
+        }
+
+        var metadataPath = path.join(p, "package.json");
+        try {
+            var metadata = fs.readFileSync(metadataPath);
+            var packageId = JSON.parse(metadata).name;
+            if (typeof(packageId) !== 'string') {
+                // Fall back to the directory name in case we're in a package
+                // that doesn't conform to the CommonJS spec, such as a Bespin
+                // plugin.
+                packageId = path.basename(p);
+            }
+
+            if (libPath == null) {
+                // We're in a nonconformant (Bespin-style) package lacking a
+                // "lib" directory. Assume that the module files are rooted
+                // alongside the package.json file.
+                libPath = p;
+            }
+
+            return commonJS(fullPath.substring(libPath.length + 1), packageId);
+        } catch (e) {}
+
+        if (path.basename(p) === "lib") {
+            libPath = p;
+        }
+
+        if (librootIds.hasOwnProperty(idFor(st))) {
+            return commonJS(fullPath.substring(p.length + 1));
+        }
+
+        i++;
+    }
+
+    return { commonJS: false };
+}
+
 var idsSeen = {};
-function processPath(cur, library, moduleId, packageId) {
-    var st = fs.statSync(cur);
-    var id = st.dev + "," + st.ino;
+function processPath(p) {
+    var st = fs.statSync(p);
+    var id = idFor(st);
     if (id in idsSeen) {
         return; // avoid loops
     }
     idsSeen[id] = true;
 
-    var ext = path.extname(cur);
-
     if (st.isDirectory()) {
-        var basename = path.basename(cur);
-        var submoduleId;
-        try {
-            var packageMetadataPath = path.join(cur, "package.json");
-            var packageMetadata = fs.readFileSync(packageMetadataPath);
-            var subpackageId = JSON.parse(packageMetadata).name;
-            if (typeof(subpackageId) !== 'string') {
-                // Fall back to the directory name in case we're in a package
-                // that doesn't conform to the CommonJS spec, such as a Bespin
-                // plugin.
-                subpackageId = basename;
-            }
-
-            var libDir = path.join(cur, "lib");
-            try {
-                var libst = fs.statSync(libDir);
-                if (!libst.isDirectory()) {
-                    throw 'nondirectory';
-                }
-
-                processPath(libDir, true, "", subpackageId);
-            } catch (e) {
-                //
-                // We're in a nonconformant (Bespin-style) package lacking a
-                // "lib" directory. Assume that the module files are rooted
-                // alongside the package.json file.
-                //
-                // FIXME: Check the exception. Make sure it's an ENOENT or
-                // 'nondirectory'.
-                //
-                packageId = subpackageId;
-            }
-
-            submoduleId = "";
-        } catch (e) {
-            //
-            // Not a CommonJS package.
-            //
-            // FIXME: Check the exception. Make sure it's an ENOENT.
-            //
-            if (library) {
-                var submodulePrefix = (moduleId === "") ? "" : moduleId + "/";
-                submoduleId = submodulePrefix + basename;
-            } else {
-                if (id in librootIds) {
-                    library = true;
-                    packageId = "";
-                }
-
-                submoduleId = "";
-            }
-        }
-
-        fs.readdirSync(cur).forEach(function(filename) {
-            var subpath = path.join(cur, filename);
-            processPath(subpath, library, submoduleId, packageId);
+        fs.readdirSync(p).forEach(function(filename) {
+            processPath(path.join(p, filename));
         });
-    } else if (ext === ".js") {
-        var packagePrefix = (packageId === "") ? "" : packageId + ":";
-        var basenameNoExt = path.basename(cur, ext);
-        var thisModuleId;
-        if (basenameNoExt === "index") {
-            thisModuleId = packagePrefix + moduleId;
-        } else {
-            var modulePrefix = (moduleId === "") ? "" : moduleId + "/";
-            thisModuleId = packagePrefix + modulePrefix + basenameNoExt;
-        }
-        var data = fs.readFileSync(cur);
-
+    } else if (path.extname(p).toLowerCase() === ".js") {
         try {
-            tags.add(data, cur, { commonJS: library, module: thisModuleId });
+            var data = fs.readFileSync(p);
+            tags.add(data, p, getModuleInfo(p));
         } catch (e) {
             if ('lineNumber' in e) {
                 sys.puts("at line " + e.lineNumber + ":");
