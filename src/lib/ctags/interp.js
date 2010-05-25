@@ -74,7 +74,7 @@ function FunctionObject(interp, node, scope) {
 };
 
 FunctionObject.prototype = {
-    call: function(thisObject, args) {
+    call: function(ctx, thisObject, args) {
         var activation = { type: 'activation', data: {} };
         var params = this.node.params;
         for (var i = 0; i < args.data.length; i++) {
@@ -82,13 +82,14 @@ FunctionObject.prototype = {
         }
         activation.data.arguments = activation;
 
-        var ctx = { scope: { object: activation, parent: this.scope } };
+        var newContext = _.clone(ctx);
+        newContext.scope = { object: activation, parent: this.scope };
 
         try {
-            this.interp._exec(this.node.body, ctx);
+            this.interp._exec(this.node.body, newContext);
         } catch (e) {
             if (e === 'return') {
-                return ctx.result;
+                return newContext.result;
             }
 
             throw e;
@@ -220,7 +221,7 @@ exports.Interpreter.prototype = {
                     result = this.getNullValue();
                 }
             } else if (!(name in container.data)) {
-                result = this.getNullValue();
+                result = { type: 'unresolved', ref: value, data: null };
             } else {
                 result = container.data[name];
             }
@@ -366,7 +367,7 @@ exports.Interpreter.prototype = {
                 return this.getNullValue();
             }
 
-            return fn.call(thisObject, rhs);
+            return fn.call(ctx, thisObject, rhs);
 
         case tokenIds.NEW:
         case tokenIds.NEW_WITH_ARGS:
@@ -399,10 +400,7 @@ exports.Interpreter.prototype = {
                 scope = scope.parent;
             }
 
-            var container = (scope === null)
-                ? this.getNullValue()
-                : scope.object;
-
+            var container = (scope != null) ? scope.object : ctx.global;
             var name = node.value;
             var rv = {
                 type: 'ref',
@@ -458,7 +456,7 @@ exports.Interpreter.prototype = {
             return;     // true behavior: ReferenceError
         }
 
-        var container = dest.container != null ? dest.container : ctx.global;
+        var container = dest.container;
         this.coerceToStorable(container, ctx);
 
         var name = dest.name;
@@ -479,6 +477,11 @@ exports.Interpreter.prototype = {
     coerceToStorable: function(value, ctx) {
         if (value.type in STORABLE_TYPES) {
             return;
+        }
+
+        if (value.type === 'unresolved') {
+            // Make the unresolved value spring into existence!
+            this._store(value.ref, value, ctx); 
         }
 
         value.type = 'object';
