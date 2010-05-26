@@ -40,6 +40,14 @@ To play with Narcissus' parser:
 * `make serve`
 * Navigate to [`http://localhost:8080/html/parser.html`] [parser].
 
+Usage
+-----
+Simply go to your project root and invoke `jsctags lib` (replacing `lib` with
+the directory in which your JavaScript source files are stored). The `tags`
+file will be placed in the current directory.
+
+For more options, try `jsctags -h`.
+
 Directory structure
 -------------------
 The directory structure mostly follows the CommonJS packaging scheme:
