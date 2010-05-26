@@ -155,6 +155,11 @@ function getModuleInfo(fullPath) {
             return commonJS(fullPath.substring(p.length + 1));
         }
 
+        if (p.lastIndexOf("/") < 1) {
+            // For some reason path.dirname() returns "." once it's done.
+            break;
+        }
+
         i++;
     }
 

@@ -26,5 +26,8 @@ uninstall:
 serve:
 	$(NODE) serve.js
 
-.PHONY:	all install uninstall serve
+tags:
+	$(NODE) bin/jsctags.js -Llib/jsctags js lib/jsctags
+
+.PHONY:	all install uninstall serve tags
 
