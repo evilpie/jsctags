@@ -47,6 +47,7 @@ function parse() {
         var parse = require('narcissus').parse;
         var jsdefs = require('narcissus:jsdefs');
         var tokenIds = jsdefs.tokenIds;
+        var fixAst = require('narcissus').fixAst;
 
         var astToJSON = function(ast) {
             var desc;
@@ -111,7 +112,10 @@ function parse() {
             return json;
         };
 
-        var ast = parse($('#js').val(), 'js', 1);
+        var ast = //fixAst(
+            parse($('#js').val(), 'js', 1)       ;
+            //);
+        //document.write(ast.length);
         $('#tree').tree({
             data: {
                 type:   'json',
