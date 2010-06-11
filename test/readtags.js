@@ -11,6 +11,6 @@ var tags = new ctags.Tags();
 var str = fs.readFileSync(argv[2]);
 tags.readString(str);
 
-var result = (argv.length >= 4) ? tags.get(argv[3]) : tags.tags;
+var result = (argv.length >= 4) ? tags.stem(argv[3]) : tags.tags;
 sys.puts(sys.inspect(result));
 
