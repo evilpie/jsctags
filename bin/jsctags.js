@@ -184,7 +184,7 @@ function processPath(p) {
     } else if (path.extname(p).toLowerCase() === ".js") {
         try {
             var data = fs.readFileSync(p);
-            tags.add(data, p, getModuleInfo(p));
+            tags.scan(data, p, getModuleInfo(p));
         } catch (e) {
             if ('lineNumber' in e) {
                 sys.puts("error:" + p + ":" + e.lineNumber + ": " + e);
