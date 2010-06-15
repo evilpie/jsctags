@@ -47,7 +47,13 @@ function parse() {
         var parse = require('narcissus').parse;
         var jsdefs = require('narcissus:jsdefs');
         var tokenIds = jsdefs.tokenIds;
+
         var fixAst = require('narcissus').fixAst;
+        var labelAst = require('narcissus').labelAst;
+        var tagVarRefsAst = require('narcissus').tagVarRefsAst;
+
+        //console.log(typeof(parse));
+        //console.log(require('narcissus'));
 
         var astToJSON = function(ast) {
             var desc;
@@ -82,11 +88,14 @@ function parse() {
 
             var children = [];
 
-            var i = 0;
-            while (ast[i] !== null && ast[i] !== undefined) {
-                children.push(ast[i]);
-                i++;
-            }
+            // var i = 0;
+            // while (ast[i] !== null && ast[i] !== undefined) {
+            //     children.push(ast[i]);
+            //     i++;
+            // }
+
+            // the while loop can go past the array's length for some reason
+            for (var i=0, len=ast.length; i<len; i++) children.push(ast[i]);
 
             CHILDREN_KEYS.forEach(function(childKey) {
                 if (!(childKey in ast)) {
@@ -112,10 +121,10 @@ function parse() {
             return json;
         };
 
-        var ast = //fixAst(
-            parse($('#js').val(), 'js', 1)       ;
-            //);
-        //document.write(ast.length);
+        //var ast = parse($('#js').val(), 'js', 1);
+        var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(), 'js', 1))));
+        //var ast = labelAst(fixAst(parse($('#js').val(), 'js', 1)));
+        //console.log(ast.length);
         $('#tree').tree({
             data: {
                 type:   'json',
