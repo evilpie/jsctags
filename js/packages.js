@@ -65,6 +65,12 @@ tiki.register('::narcissus', {
             name:   'jsparse.js',
             url:    "../lib/jsctags/narcissus/jsparse.js",
             type:   'script'
+        },
+        {
+            id:     'narcissus:jscfa',
+            name:   'jscfa.js',
+            url:    "../lib/jsctags/narcissus/jscfa.js",
+            type:   'script'
         }
     ]
 });
