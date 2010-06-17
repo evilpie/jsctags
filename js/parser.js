@@ -88,12 +88,6 @@ function parse() {
 
             var children = [];
 
-            // var i = 0;
-            // while (ast[i] !== null && ast[i] !== undefined) {
-            //     children.push(ast[i]);
-            //     i++;
-            // }
-
             // the while loop can go past the array's length for some reason
             for (var i=0, len=ast.length; i<len; i++) children.push(ast[i]);
 
