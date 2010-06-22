@@ -7,8 +7,8 @@ LIB_SRC=$(addprefix lib/jsctags/,getopt.js log.js paperboy.js traits.js \
 	underscore.js)
 LIB_CTAGS_SRC=$(addprefix lib/jsctags/ctags/,index.js interp.js nativefn.js \
 	reader.js writer.js)
-LIB_NARCISSUS_SRC=$(addprefix lib/jsctags/narcissus/,index.js jsdefs.js \
-	jslex.js jsparse.js)
+LIB_NARCISSUS_SRC=$(addprefix lib/jsctags/narcissus/,index.js jscfa.js \
+    jsdefs.js jslex.js jsparse.js)
 
 install:
 	$(INSTALL) -d $(PREFIX)/bin
