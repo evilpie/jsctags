@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const CHILDREN_KEYS = [
-    'setup', 'varDecl', 'object', 'condition', 'iterator', 'discriminant',
-    'cases', 'update', 'tryBlock', 'body', 'expression', 'statement', 'value',
-    'thenPart', 'elsePart', 'catchClauses', 'finallyBlock'
-];
+const CHILDREN_KEYS =
+  ['funDecls', 'setup', 'varDecl', 'object', 'condition', 'iterator',
+   'discriminant', 'cases', 'update', 'tryBlock', 'body', 'expression',
+   'statement', 'value', 'thenPart', 'elsePart', 'catchClauses', 'finallyBlock'
+   ];
 
 function parse() {
     tiki.ensurePackage('::narcissus', function() {
@@ -88,7 +88,6 @@ function parse() {
 
             var children = [];
 
-            // the while loop can go past the array's length for some reason
             for (var i=0, len=ast.length; i<len; i++) children.push(ast[i]);
 
             CHILDREN_KEYS.forEach(function(childKey) {
@@ -115,9 +114,10 @@ function parse() {
             return json;
         };
 
-        //var ast = parse($('#js').val(), 'js', 1);
-        var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(), 'js', 1))));
+        var ast = parse($('#js').val(), 'js', 1);
+        //var ast = fixAst(parse($('#js').val(), 'js', 1));
         //var ast = labelAst(fixAst(parse($('#js').val(), 'js', 1)));
+        //var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(),'js',1))));
         //console.log(ast.length);
         $('#tree').tree({
             data: {
