@@ -51,10 +51,9 @@ function parse() {
         var fixAst = require('narcissus').fixAst;
         var labelAst = require('narcissus').labelAst;
         var tagVarRefsAst = require('narcissus').tagVarRefsAst;
-
-        //console.log(typeof(parse));
-        //console.log(require('narcissus'));
-
+        var changeAst = require('narcissus').changeAst;
+        var evalToplevel = require('narcissus').evalToplevel;
+        
         var astToJSON = function(ast) {
             var desc;
             if (ast.type in jsdefs.tokens) {
@@ -117,7 +116,10 @@ function parse() {
         //var ast = fixAst(parse($('#js').val(), 'js', 1));
         //var ast = labelAst(fixAst(parse($('#js').val(), 'js', 1)));
         //var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(),'js',1))));
-        //console.log(ast.length);
+
+        changeAst(ast);
+        evalToplevel(ast);
+        
         $('#tree').tree({
             data: {
                 type:   'json',
