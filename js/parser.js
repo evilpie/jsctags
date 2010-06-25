@@ -118,7 +118,7 @@ function parse() {
         //var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(),'js',1))));
 
         changeAst(ast);
-        //evalToplevel(ast);
+        evalToplevel(ast);
         
         $('#tree').tree({
             data: {
