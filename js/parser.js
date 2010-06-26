@@ -65,7 +65,6 @@ function parse() {
             if ('lineno' in ast) {
                 desc += " @ " + ast.lineno;
             }
-
             var nameField;
             switch (ast.type) {
             case tokenIds.IDENTIFIER:
@@ -82,12 +81,10 @@ function parse() {
             if (nameField in ast) {
                 desc += " " + ast[nameField];
             }
-
             var json = { data: desc };
 
             var children = [];
             for (var i=0, len=ast.length; i<len; i++) children.push(ast[i]);
-
             CHILDREN_KEYS.forEach(function(childKey) {
                 if (!(childKey in ast)) {
                     return;
@@ -116,10 +113,9 @@ function parse() {
         //var ast = fixAst(parse($('#js').val(), 'js', 1));
         //var ast = labelAst(fixAst(parse($('#js').val(), 'js', 1)));
         //var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(),'js',1))));
-
         changeAst(ast);
         evalToplevel(ast);
-        
+
         $('#tree').tree({
             data: {
                 type:   'json',
