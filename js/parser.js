@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const CHILDREN_KEYS = [
-    'setup', 'varDecl', 'object', 'condition', 'iterator', 'discriminant',
-    'cases', 'update', 'tryBlock', 'body', 'expression', 'statement', 'value',
-    'thenPart', 'elsePart', 'catchClauses', 'finallyBlock'
-];
+const CHILDREN_KEYS =
+  ['funDecls', 'setup', 'varDecl', 'object', 'condition', 'iterator',
+   'discriminant', 'cases', 'update', 'tryBlock', 'body', 'expression',
+   'statement', 'value', 'thenPart', 'elsePart', 'catchClauses', 'finallyBlock'
+   ];
 
 function parse() {
     tiki.ensurePackage('::narcissus', function() {
@@ -51,10 +51,9 @@ function parse() {
         var fixAst = require('narcissus').fixAst;
         var labelAst = require('narcissus').labelAst;
         var tagVarRefsAst = require('narcissus').tagVarRefsAst;
-
-        //console.log(typeof(parse));
-        //console.log(require('narcissus'));
-
+        var changeAst = require('narcissus').changeAst;
+        var evalToplevel = require('narcissus').evalToplevel;
+        
         var astToJSON = function(ast) {
             var desc;
             if (ast.type in jsdefs.tokens) {
@@ -66,7 +65,6 @@ function parse() {
             if ('lineno' in ast) {
                 desc += " @ " + ast.lineno;
             }
-
             var nameField;
             switch (ast.type) {
             case tokenIds.IDENTIFIER:
@@ -83,14 +81,10 @@ function parse() {
             if (nameField in ast) {
                 desc += " " + ast[nameField];
             }
-
             var json = { data: desc };
 
             var children = [];
-
-            // the while loop can go past the array's length for some reason
             for (var i=0, len=ast.length; i<len; i++) children.push(ast[i]);
-
             CHILDREN_KEYS.forEach(function(childKey) {
                 if (!(childKey in ast)) {
                     return;
@@ -115,10 +109,13 @@ function parse() {
             return json;
         };
 
-        //var ast = parse($('#js').val(), 'js', 1);
-        var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(), 'js', 1))));
+        var ast = parse($('#js').val(), 'js', 1);
+        //var ast = fixAst(parse($('#js').val(), 'js', 1));
         //var ast = labelAst(fixAst(parse($('#js').val(), 'js', 1)));
-        //console.log(ast.length);
+        //var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(),'js',1))));
+        changeAst(ast);
+        evalToplevel(ast);
+
         $('#tree').tree({
             data: {
                 type:   'json',
