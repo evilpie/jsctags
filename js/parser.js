@@ -48,11 +48,7 @@ function parse() {
         var jsdefs = require('narcissus:jsdefs');
         var tokenIds = jsdefs.tokenIds;
 
-        var fixAst = require('narcissus').fixAst;
-        var labelAst = require('narcissus').labelAst;
-        var tagVarRefsAst = require('narcissus').tagVarRefsAst;
-        var changeAst = require('narcissus').changeAst;
-        var evalToplevel = require('narcissus').evalToplevel;
+        var cfa2 = require('narcissus').cfa2;
         
         var astToJSON = function(ast) {
             var desc;
@@ -113,8 +109,7 @@ function parse() {
         //var ast = fixAst(parse($('#js').val(), 'js', 1));
         //var ast = labelAst(fixAst(parse($('#js').val(), 'js', 1)));
         //var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(),'js',1))));
-        changeAst(ast);
-        evalToplevel(ast);
+        cfa2(ast);
 
         $('#tree').tree({
             data: {
