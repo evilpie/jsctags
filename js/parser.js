@@ -110,6 +110,7 @@ function parse() {
         //var ast = labelAst(fixAst(parse($('#js').val(), 'js', 1)));
         //var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(),'js',1))));
         cfa2(ast);
+        //console.log("adfafasf");
 
         $('#tree').tree({
             data: {
