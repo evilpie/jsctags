@@ -41,6 +41,8 @@ const CHILDREN_KEYS =
    'statement', 'value', 'thenPart', 'elsePart', 'catchClauses', 'finallyBlock'
    ];
 
+var myast;
+
 function parse() {
     tiki.ensurePackage('::narcissus', function() {
         var require = tiki.require;
@@ -106,10 +108,11 @@ function parse() {
         };
 
         var ast = parse($('#js').val(), 'js', 1);
+        myast = ast;
         //var ast = fixAst(parse($('#js').val(), 'js', 1));
         //var ast = labelAst(fixAst(parse($('#js').val(), 'js', 1)));
         //var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(),'js',1))));
-        cfa2(ast);
+        //cfa2(ast);
         //console.log("adfafasf");
 
         $('#tree').tree({

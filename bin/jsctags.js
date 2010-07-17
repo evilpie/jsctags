@@ -196,7 +196,9 @@ function processPath(p) {
 }
 
 for (var i = 0; i < pathCount; i++) {
-    processPath(argv[i + 2], false, "", "");
+    //processPath(argv[i + 2], false, "", "");
+    //dimvar: processPath seems to use its first arg only
+    processPath(argv[i + 2]);
 }
 
 var outPath;
