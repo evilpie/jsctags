@@ -1,0 +1,10 @@
+!_TAG_FILE_FORMAT	2	/extended format/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Patrick Walton	/pwalton@mozilla.com/
+!_TAG_PROGRAM_NAME	jsctags	//
+!_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
+!_TAG_PROGRAM_VERSION	0.1	//
+copyInt_	check-mont.js	/^function copyInt_(x,n) {$/;"	f	type:undefined function(any, number)
+copy_	check-mont.js	/^function copy_(x,y) {$/;"	f	type:undefined function(Array, any)
+greater	check-mont.js	/^function greater(x,y) {$/;"	f	type:number function(Array, any)
+mont_	check-mont.js	/^function mont_(x,y,n,np) {$/;"	f	type:undefined function(Array, Array, Array, number)
