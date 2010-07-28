@@ -189,6 +189,7 @@ function processPath(p) {
             if ('lineNumber' in e) {
                 sys.puts("error:" + p + ":" + e.lineNumber + ": " + e);
             } else {
+                sys.puts(e.message);
                 throw e;
             }
         }
