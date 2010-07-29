@@ -4,3 +4,7 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
+%anonymous_function	check-date-format-xparb.js	/^Date.createNewFormat = function(format) {$/;"	f	type:any function(string)
+%anonymous_function	check-date-format-xparb.js	/^Date.getFormatCode = function(character) {$/;"	f	type:string function(string)
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.dateFormat = function(format) {$/;"	f	type:any function(string)
+%anonymous_function	check-date-format-xparb.js	/^String.escape = function(string) {$/;"	f	type:any function(string)
