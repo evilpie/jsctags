@@ -5,7 +5,7 @@
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
 %anonymous_function	check-string-tagcloud.js	/^        s.parseJSON = function (filter) {$/;"	f	type:number function(number function(string, any))
-%anonymous_function	check-string-tagcloud.js	/^    (function (s) {$/;"	f	type:any function(String)
+%anonymous_function	check-string-tagcloud.js	/^    (function (s) {$/;"	f	type:undefined function(String)
 %anonymous_function	check-string-tagcloud.js	/^var tagInfo = tagInfoJSON.parseJSON(function(a, b) { if (a == "popularity") { return Math.log(b) \/ log2; } else {return b; } });$/;"	f	type:number function(string, any)
 makeTagCloud	check-string-tagcloud.js	/^function makeTagCloud(tagInfo)$/;"	f	type:string function(number)
 walk	check-string-tagcloud.js	/^            function walk(k, v) {$/;"	f	type:number function(string, any)

@@ -6,4 +6,4 @@
 !_TAG_PROGRAM_VERSION	0.1	//
 nsieve	check-access-nsieve.js	/^function nsieve(m, isPrime){$/;"	f	type:number function(number, Array[boolean])
 pad	check-access-nsieve.js	/^function pad(number,width){$/;"	f	type:string function(any, any)
-sieve	check-access-nsieve.js	/^function sieve() {$/;"	f	type:any function()
+sieve	check-access-nsieve.js	/^function sieve() {$/;"	f	type:undefined function()
