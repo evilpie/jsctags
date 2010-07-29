@@ -5,7 +5,7 @@
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
 A	check-math-spectral-norm.js	/^function A(i,j) {$/;"	f	type:number function(number, number)
-AtAu	check-math-spectral-norm.js	/^function AtAu(u,v,w) {$/;"	f	type:undefined function(Array, Array, Array)
-Atu	check-math-spectral-norm.js	/^function Atu(u,v) {$/;"	f	type:undefined function(Array, Array)
-Au	check-math-spectral-norm.js	/^function Au(u,v) {$/;"	f	type:undefined function(Array, Array)
-spectralnorm	check-math-spectral-norm.js	/^function spectralnorm(n) {$/;"	f	type:undefined function(number)
+AtAu	check-math-spectral-norm.js	/^function AtAu(u,v,w) {$/;"	f	type:any function(Array[number], Array[number], Array[number])
+Atu	check-math-spectral-norm.js	/^function Atu(u,v) {$/;"	f	type:any function(Array[number], Array[number])
+Au	check-math-spectral-norm.js	/^function Au(u,v) {$/;"	f	type:any function(Array[number], Array[number])
+spectralnorm	check-math-spectral-norm.js	/^function spectralnorm(n) {$/;"	f	type:any function(number)
