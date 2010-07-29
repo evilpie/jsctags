@@ -4,6 +4,6 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
-ack	check-controlflow-recursive.js	/^function ack(m,n){$/;"	f	type:<number | undefined> function(number, <number | undefined>)
+ack	check-controlflow-recursive.js	/^function ack(m,n){$/;"	f	type:number function(number, number)
 fib	check-controlflow-recursive.js	/^function fib(n) {$/;"	f	type:number function(number)
-tak	check-controlflow-recursive.js	/^function tak(x,y,z) {$/;"	f	type:<number | undefined> function(<number | undefined>, <number | undefined>, <number | undefined>)
+tak	check-controlflow-recursive.js	/^function tak(x,y,z) {$/;"	f	type:number function(number, number, number)
