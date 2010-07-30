@@ -5,6 +5,19 @@
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
 %anonymous_function	check-date-format-xparb.js	/^Date.createNewFormat = function(format) {$/;"	f	type:undefined function(string)
+%anonymous_function	check-date-format-xparb.js	/^Date.createParser = function(format) {$/;"	f	type:function
+%anonymous_function	check-date-format-xparb.js	/^Date.formatCodeToRegex = function(character, currentGroup) {$/;"	f	type:function
 %anonymous_function	check-date-format-xparb.js	/^Date.getFormatCode = function(character) {$/;"	f	type:string function(string)
+%anonymous_function	check-date-format-xparb.js	/^Date.parseDate = function(input, format) {$/;"	f	type:function
 %anonymous_function	check-date-format-xparb.js	/^Date.prototype.dateFormat = function(format) {$/;"	f	type:any function(string)
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.getDayOfYear = function() {$/;"	f	type:function
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.getDaysInMonth = function() {$/;"	f	type:function
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.getFirstDayOfMonth = function() {$/;"	f	type:function
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.getGMTOffset = function() {$/;"	f	type:function
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.getLastDayOfMonth = function() {$/;"	f	type:function
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.getSuffix = function() {$/;"	f	type:function
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.getTimezone = function() {$/;"	f	type:function
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.getWeekOfYear = function() {$/;"	f	type:function
+%anonymous_function	check-date-format-xparb.js	/^Date.prototype.isLeapYear = function() {$/;"	f	type:function
 %anonymous_function	check-date-format-xparb.js	/^String.escape = function(string) {$/;"	f	type:any function(string)
+%anonymous_function	check-date-format-xparb.js	/^String.leftPad = function (val, size, ch) {$/;"	f	type:function

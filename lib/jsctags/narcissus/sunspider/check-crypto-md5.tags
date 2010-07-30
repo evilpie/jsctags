@@ -4,11 +4,11 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
-b64_hmac_md5	check-crypto-md5.js	/^function b64_hmac_md5(key, data) { return binl2b64(core_hmac_md5(key, data)); }$/;"	f	type:<number | string> function(any, any)
-b64_md5	check-crypto-md5.js	/^function b64_md5(s){ return binl2b64(core_md5(str2binl(s), s.length * chrsz));}$/;"	f	type:<number | string> function(any)
-binl2b64	check-crypto-md5.js	/^function binl2b64(binarray)$/;"	f	type:<number | string> function(Array[number])
+b64_hmac_md5	check-crypto-md5.js	/^function b64_hmac_md5(key, data) { return binl2b64(core_hmac_md5(key, data)); }$/;"	f	type:string function(any, any)
+b64_md5	check-crypto-md5.js	/^function b64_md5(s){ return binl2b64(core_md5(str2binl(s), s.length * chrsz));}$/;"	f	type:string function(any)
+binl2b64	check-crypto-md5.js	/^function binl2b64(binarray)$/;"	f	type:string function(Array[number])
 binl2hex	check-crypto-md5.js	/^function binl2hex(binarray)$/;"	f	type:string function(Array[number])
-binl2str	check-crypto-md5.js	/^function binl2str(bin)$/;"	f	type:<number | string> function(Array[number])
+binl2str	check-crypto-md5.js	/^function binl2str(bin)$/;"	f	type:string function(Array[number])
 bit_rol	check-crypto-md5.js	/^function bit_rol(num, cnt)$/;"	f	type:number function(number, number)
 core_hmac_md5	check-crypto-md5.js	/^function core_hmac_md5(key, data)$/;"	f	type:Array[number] function(any, any)
 core_md5	check-crypto-md5.js	/^function core_md5(x, len)$/;"	f	type:Array[number] function(Array[number], number)
@@ -22,5 +22,5 @@ md5_ii	check-crypto-md5.js	/^function md5_ii(a, b, c, d, x, s, t)$/;"	f	type:num
 md5_vm_test	check-crypto-md5.js	/^function md5_vm_test()$/;"	f	type:boolean function()
 safe_add	check-crypto-md5.js	/^function safe_add(x, y)$/;"	f	type:number function(<number | undefined>, number)
 str2binl	check-crypto-md5.js	/^function str2binl(str)$/;"	f	type:Array[number] function(string)
-str_hmac_md5	check-crypto-md5.js	/^function str_hmac_md5(key, data) { return binl2str(core_hmac_md5(key, data)); }$/;"	f	type:<number | string> function(any, any)
-str_md5	check-crypto-md5.js	/^function str_md5(s){ return binl2str(core_md5(str2binl(s), s.length * chrsz));}$/;"	f	type:<number | string> function(any)
+str_hmac_md5	check-crypto-md5.js	/^function str_hmac_md5(key, data) { return binl2str(core_hmac_md5(key, data)); }$/;"	f	type:string function(any, any)
+str_md5	check-crypto-md5.js	/^function str_md5(s){ return binl2str(core_md5(str2binl(s), s.length * chrsz));}$/;"	f	type:string function(any)

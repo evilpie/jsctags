@@ -5,4 +5,32 @@
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
 %anonymous_function	check-date-format-tofte.js	/^Date.prototype.formatDate = function (input,time) {$/;"	f	type:string function(string, undefined)
+A	check-date-format-tofte.js	/^    function A() {$/;"	f	type:function
+B	check-date-format-tofte.js	/^    function B(){$/;"	f	type:function
+D	check-date-format-tofte.js	/^    function D() {$/;"	f	type:function
+F	check-date-format-tofte.js	/^    function F() {$/;"	f	type:function
+G	check-date-format-tofte.js	/^    function G() {$/;"	f	type:function
+H	check-date-format-tofte.js	/^    function H() {$/;"	f	type:function
+L	check-date-format-tofte.js	/^    function L() {$/;"	f	type:function
+M	check-date-format-tofte.js	/^    function M() {$/;"	f	type:function
+O	check-date-format-tofte.js	/^    function O() {$/;"	f	type:function
+S	check-date-format-tofte.js	/^    function S() {$/;"	f	type:function
+U	check-date-format-tofte.js	/^    function U() {$/;"	f	type:function
+W	check-date-format-tofte.js	/^    function W() {$/;"	f	type:function
+Y	check-date-format-tofte.js	/^    function Y() {$/;"	f	type:function
+a	check-date-format-tofte.js	/^    function a() {$/;"	f	type:function
 arrayExists	check-date-format-tofte.js	/^function arrayExists(array, x) {$/;"	f	type:boolean function(Array[string], string)
+d	check-date-format-tofte.js	/^    function d() {$/;"	f	type:function
+g	check-date-format-tofte.js	/^    function g() {$/;"	f	type:function
+h	check-date-format-tofte.js	/^    function h() {$/;"	f	type:function
+i	check-date-format-tofte.js	/^    function i() {$/;"	f	type:function
+j	check-date-format-tofte.js	/^    function j() {$/;"	f	type:function
+l	check-date-format-tofte.js	/^    function l() {$/;"	f	type:function
+m	check-date-format-tofte.js	/^    function m() {$/;"	f	type:function
+n	check-date-format-tofte.js	/^    function n() {$/;"	f	type:function
+r	check-date-format-tofte.js	/^    function r() {$/;"	f	type:function
+s	check-date-format-tofte.js	/^    function s() {$/;"	f	type:function
+t	check-date-format-tofte.js	/^    function t() {$/;"	f	type:function
+w	check-date-format-tofte.js	/^    function w() {$/;"	f	type:function
+y	check-date-format-tofte.js	/^    function y() {$/;"	f	type:function
+z	check-date-format-tofte.js	/^    function z() {$/;"	f	type:function
