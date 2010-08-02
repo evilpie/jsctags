@@ -20,7 +20,7 @@ createVector	check-3d-raytrace.js	/^function createVector(x,y,z) {$/;"	f	type:Ar
 cross	check-3d-raytrace.js	/^function cross(v1, v2) {$/;"	f	type:Array[number] function(Array[number], Array[number])
 dot	check-3d-raytrace.js	/^function dot(v1, v2) {$/;"	f	type:number function(Array[number], Array[number])
 invertMatrix	check-3d-raytrace.js	/^function invertMatrix(self) {$/;"	f	type:Array[number] function(Array[number])
-lengthVector	check-3d-raytrace.js	/^function lengthVector(self) {$/;"	f	type:any function(Array[number])
+lengthVector	check-3d-raytrace.js	/^function lengthVector(self) {$/;"	f	type:number function(Array[number])
 normalise	check-3d-raytrace.js	/^function normalise(v) {$/;"	f	type:Array[number] function(Array[number])
 normaliseVector	check-3d-raytrace.js	/^function normaliseVector(self) {$/;"	f	type:Array[number] function(Array[number])
 raytraceScene	check-3d-raytrace.js	/^function raytraceScene()$/;"	f	type:Array[Array] function()
