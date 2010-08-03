@@ -25,5 +25,5 @@ decodeBase64	check-crypto-aes.js	/^function decodeBase64(str) {$/;"	f	type:strin
 decodeUTF8	check-crypto-aes.js	/^function decodeUTF8(str) {  \/\/ decode utf-8 encoded string back into multi-byte characters$/;"	f	type:string function(string)
 encodeBase64	check-crypto-aes.js	/^function encodeBase64(str) {  \/\/ http:\/\/tools.ietf.org\/html\/rfc4648$/;"	f	type:string function(any)
 encodeUTF8	check-crypto-aes.js	/^function encodeUTF8(str) {  \/\/ encode multi-byte string into utf-8 multiple single-byte characters $/;"	f	type:any function(any)
-escCtrlChars	check-crypto-aes.js	/^function escCtrlChars(str) {  \/\/ escape control chars which might cause problems handling ciphertext$/;"	f	type:any function(string)
-unescCtrlChars	check-crypto-aes.js	/^function unescCtrlChars(str) {  \/\/ unescape potentially problematic control characters$/;"	f	type:any function(<string | undefined>)
+escCtrlChars	check-crypto-aes.js	/^function escCtrlChars(str) {  \/\/ escape control chars which might cause problems handling ciphertext$/;"	f	type:string function(string)
+unescCtrlChars	check-crypto-aes.js	/^function unescCtrlChars(str) {  \/\/ unescape potentially problematic control characters$/;"	f	type:string function(<string | undefined>)

@@ -19,5 +19,5 @@
 %anonymous_function	check-date-format-xparb.js	/^Date.prototype.getTimezone = function() {$/;"	f	type:function
 %anonymous_function	check-date-format-xparb.js	/^Date.prototype.getWeekOfYear = function() {$/;"	f	type:function
 %anonymous_function	check-date-format-xparb.js	/^Date.prototype.isLeapYear = function() {$/;"	f	type:function
-%anonymous_function	check-date-format-xparb.js	/^String.escape = function(string) {$/;"	f	type:any function(string)
+%anonymous_function	check-date-format-xparb.js	/^String.escape = function(string) {$/;"	f	type:string function(string)
 %anonymous_function	check-date-format-xparb.js	/^String.leftPad = function (val, size, ch) {$/;"	f	type:function

@@ -5,7 +5,7 @@
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
 %anonymous_function	check-3d-raytrace.js	/^    var floorShader = function(tri, pos, view) {$/;"	f	type:any function(<null | Triangle>, Array[number], Array[number])
-%anonymous_function	check-3d-raytrace.js	/^Camera.prototype.generateRayPair = function(y) {$/;"	f	type:any function(number)
+%anonymous_function	check-3d-raytrace.js	/^Camera.prototype.generateRayPair = function(y) {$/;"	f	type:Array[Object] function(number)
 %anonymous_function	check-3d-raytrace.js	/^Camera.prototype.render = function(scene, pixels, width, height) {$/;"	f	type:undefined function(Scene, Array[Array], number, number)
 %anonymous_function	check-3d-raytrace.js	/^Scene.prototype.blocked = function(O, D, far) {$/;"	f	type:boolean function(Array[number], Array[number], number)
 %anonymous_function	check-3d-raytrace.js	/^Scene.prototype.intersect = function(origin, dir, near, far) {$/;"	f	type:<null | Array[number]> function(Array[number], Array[number], <number | undefined>, <number | undefined>)
@@ -19,7 +19,7 @@ arrayToCanvasCommands	check-3d-raytrace.js	/^function arrayToCanvasCommands(pixe
 createVector	check-3d-raytrace.js	/^function createVector(x,y,z) {$/;"	f	type:Array[number] function(number, number, number)
 cross	check-3d-raytrace.js	/^function cross(v1, v2) {$/;"	f	type:Array[number] function(Array[number], Array[number])
 dot	check-3d-raytrace.js	/^function dot(v1, v2) {$/;"	f	type:number function(Array[number], Array[number])
-invertMatrix	check-3d-raytrace.js	/^function invertMatrix(self) {$/;"	f	type:Array[number] function(Array[number])
+invertMatrix	check-3d-raytrace.js	/^function invertMatrix(self) {$/;"	f	type:Array function(Array)
 lengthVector	check-3d-raytrace.js	/^function lengthVector(self) {$/;"	f	type:number function(Array[number])
 normalise	check-3d-raytrace.js	/^function normalise(v) {$/;"	f	type:Array[number] function(Array[number])
 normaliseVector	check-3d-raytrace.js	/^function normaliseVector(self) {$/;"	f	type:Array[number] function(Array[number])
@@ -31,4 +31,4 @@ scalev	check-3d-raytrace.js	/^function scalev(v1, v2) {$/;"	f	type:Array[number]
 sqrLengthVector	check-3d-raytrace.js	/^function sqrLengthVector(self) {$/;"	f	type:number function(any)
 sub	check-3d-raytrace.js	/^function sub(v1, v2) {$/;"	f	type:Array[number] function(<undefined | Array[number]>, Array[number])
 subVector	check-3d-raytrace.js	/^function subVector(self, v) {$/;"	f	type:Array[number] function(Array[number], Array[number])
-transformMatrix	check-3d-raytrace.js	/^function transformMatrix(self, v) {$/;"	f	type:Array[number] function(Array[number], Array[number])
+transformMatrix	check-3d-raytrace.js	/^function transformMatrix(self, v) {$/;"	f	type:Array[number] function(Array, Array[number])
