@@ -4,9 +4,9 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
-%anonymous_function	check-access-nbody.js	/^    (function(){$/;"	f	type:undefined function()
+%anonymous_function	check-access-nbody.js	/^    (function(){$/;"	f	type:void function()
 %anonymous_function	check-access-nbody.js	/^Body.prototype.offsetMomentum = function(px,py,pz) {$/;"	f	type:Body function(number, number, number)
-%anonymous_function	check-access-nbody.js	/^NBodySystem.prototype.advance = function(dt){$/;"	f	type:undefined function(number)
+%anonymous_function	check-access-nbody.js	/^NBodySystem.prototype.advance = function(dt){$/;"	f	type:void function(number)
 %anonymous_function	check-access-nbody.js	/^NBodySystem.prototype.energy = function(){$/;"	f	type:number function()
 Body	check-access-nbody.js	/^function Body(x,y,z,vx,vy,vz,mass){$/;"	f	type:Body function(number, number, number, number, number, number, number)
 Jupiter	check-access-nbody.js	/^function Jupiter(){$/;"	f	type:Body function()

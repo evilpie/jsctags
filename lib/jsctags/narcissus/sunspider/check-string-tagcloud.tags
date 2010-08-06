@@ -7,7 +7,7 @@
 %anonymous_function	check-string-tagcloud.js	/^                return '"' + this.replace(\/[\\x00-\\x1f\\\\"]\/g, function (a) {$/;"	f	type:function
 %anonymous_function	check-string-tagcloud.js	/^        s.parseJSON = function (filter) {$/;"	f	type:number function(number function(string, any))
 %anonymous_function	check-string-tagcloud.js	/^        s.toJSONString = function () {$/;"	f	type:function
-%anonymous_function	check-string-tagcloud.js	/^    (function (s) {$/;"	f	type:undefined function(String)
+%anonymous_function	check-string-tagcloud.js	/^    (function (s) {$/;"	f	type:void function(String)
 %anonymous_function	check-string-tagcloud.js	/^    Array.prototype.toJSONString = function (w) {$/;"	f	type:function
 %anonymous_function	check-string-tagcloud.js	/^    Boolean.prototype.toJSONString = function () {$/;"	f	type:function
 %anonymous_function	check-string-tagcloud.js	/^    Date.prototype.toJSONString = function () {$/;"	f	type:function
