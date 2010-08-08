@@ -1,0 +1,21 @@
+!_TAG_FILE_FORMAT	2	/extended format/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Patrick Walton	/pwalton@mozilla.com/
+!_TAG_PROGRAM_NAME	jsctags	//
+!_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
+!_TAG_PROGRAM_VERSION	0.1	//
+CalcCross	check-3d-cube.js	/^function CalcCross(V0, V1) {$/;"	f	type:Array[number] function(Array[number], Array[number])
+CalcNormal	check-3d-cube.js	/^function CalcNormal(V0, V1, V2) {$/;"	f	type:Array[number] function(Array[number], Array[number], Array[number])
+CreateP	check-3d-cube.js	/^function CreateP(X,Y,Z) {$/;"	f	type:<void | CreateP> function(number, number, number)
+DrawLine	check-3d-cube.js	/^function DrawLine(From, To) {$/;"	f	type:void function(CreateP, CreateP)
+DrawQube	check-3d-cube.js	/^function DrawQube() {$/;"	f	type:void function()
+Init	check-3d-cube.js	/^function Init(CubeSize) {$/;"	f	type:void function(number)
+Loop	check-3d-cube.js	/^function Loop() {$/;"	f	type:void function()
+MAdd	check-3d-cube.js	/^function MAdd(M1, M2) {$/;"	f	type:Array[Array] function(any, any)
+MMulti	check-3d-cube.js	/^function MMulti(M1, M2) {$/;"	f	type:Array[Array[number]] function(<Array[Array[number]] | Array>, <Array[Array[number]] | Array>)
+RotateX	check-3d-cube.js	/^function RotateX(M, Phi) {$/;"	f	type:Array[Array[number]] function(<Array[Array[number]] | Array>, number)
+RotateY	check-3d-cube.js	/^function RotateY(M, Phi) {$/;"	f	type:Array[Array[number]] function(<Array[Array[number]] | Array>, number)
+RotateZ	check-3d-cube.js	/^function RotateZ(M, Phi) {$/;"	f	type:Array[Array[number]] function(<Array[Array[number]] | Array>, number)
+Translate	check-3d-cube.js	/^function Translate(M, Dx, Dy, Dz) {$/;"	f	type:Array[Array[number]] function(<Array[Array[number]] | Array>, number, number, number)
+VMulti	check-3d-cube.js	/^function VMulti(M, V) {$/;"	f	type:Array[number] function(<Array[Array[number]] | Array>, Array[number])
+VMulti2	check-3d-cube.js	/^function VMulti2(M, V) {$/;"	f	type:Array[number] function(<Array[Array[number]] | Array>, Array[number])
