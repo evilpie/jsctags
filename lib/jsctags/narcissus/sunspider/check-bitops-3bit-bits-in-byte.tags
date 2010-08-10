@@ -4,5 +4,5 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
-TimeFunc	check-bitops-3bit-bits-in-byte.js	/^function TimeFunc(func) {$/;"	f	type:void function(number function(number))
-fast3bitlookup	check-bitops-3bit-bits-in-byte.js	/^function fast3bitlookup(b) {$/;"	f	type:number function(number)
+TimeFunc	check-bitops-3bit-bits-in-byte.js	/^function TimeFunc(func) {$/;"	f	lineno:26	type:void function(number function(number))
+fast3bitlookup	check-bitops-3bit-bits-in-byte.js	/^function fast3bitlookup(b) {$/;"	f	lineno:5	type:number function(number)

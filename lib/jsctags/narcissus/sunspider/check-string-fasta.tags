@@ -4,7 +4,7 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
-fastaRandom	check-string-fasta.js	/^function fastaRandom(n, table) {$/;"	f	type:string function(number, Object)
-fastaRepeat	check-string-fasta.js	/^function fastaRepeat(n, seq) {$/;"	f	type:string function(number, string)
-makeCumulative	check-string-fasta.js	/^function makeCumulative(table) {$/;"	f	type:void function(Object)
-rand	check-string-fasta.js	/^function rand(max) {$/;"	f	type:number function(number)
+fastaRandom	check-string-fasta.js	/^function fastaRandom(n, table) {$/;"	f	lineno:61	type:string function(number, Object)
+fastaRepeat	check-string-fasta.js	/^function fastaRepeat(n, seq) {$/;"	f	lineno:44	type:string function(number, string)
+makeCumulative	check-string-fasta.js	/^function makeCumulative(table) {$/;"	f	lineno:36	type:void function(Object)
+rand	check-string-fasta.js	/^function rand(max) {$/;"	f	lineno:8	type:number function(number)

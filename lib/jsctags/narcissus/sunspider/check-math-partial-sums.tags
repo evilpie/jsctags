@@ -4,4 +4,4 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
-partial	check-math-partial-sums.js	/^function partial(n){$/;"	f	type:Array[number] function(number)
+partial	check-math-partial-sums.js	/^function partial(n){$/;"	f	lineno:5	type:Array[number] function(number)

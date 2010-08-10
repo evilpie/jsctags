@@ -4,7 +4,7 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
-copyInt_	check-mont.js	/^function copyInt_(x,n) {$/;"	f	type:void function(Array[number], number)
-copy_	check-mont.js	/^function copy_(x,y) {$/;"	f	type:void function(Array[number], Array[number])
-greater	check-mont.js	/^function greater(x,y) {$/;"	f	type:number function(Array[number], Array[number])
-mont_	check-mont.js	/^function mont_(x,y,n,np) {$/;"	f	type:void function(Array[number], Array[number], Array[number], number)
+copyInt_	check-mont.js	/^function copyInt_(x,n) {$/;"	f	lineno:33	type:void function(Array[number], number)
+copy_	check-mont.js	/^function copy_(x,y) {$/;"	f	lineno:23	type:void function(Array[number], Array[number])
+greater	check-mont.js	/^function greater(x,y) {$/;"	f	lineno:42	type:number function(Array[number], Array[number])
+mont_	check-mont.js	/^function mont_(x,y,n,np) {$/;"	f	lineno:73	type:void function(Array[number], Array[number], Array[number], number)

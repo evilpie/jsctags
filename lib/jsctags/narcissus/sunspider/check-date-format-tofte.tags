@@ -4,33 +4,33 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
-%anonymous_function	check-date-format-tofte.js	/^Date.prototype.formatDate = function (input,time) {$/;"	f	type:string function(string, undefined)
-A	check-date-format-tofte.js	/^    function A() {$/;"	f	type:function
-B	check-date-format-tofte.js	/^    function B(){$/;"	f	type:function
-D	check-date-format-tofte.js	/^    function D() {$/;"	f	type:function
-F	check-date-format-tofte.js	/^    function F() {$/;"	f	type:function
-G	check-date-format-tofte.js	/^    function G() {$/;"	f	type:function
-H	check-date-format-tofte.js	/^    function H() {$/;"	f	type:function
-L	check-date-format-tofte.js	/^    function L() {$/;"	f	type:function
-M	check-date-format-tofte.js	/^    function M() {$/;"	f	type:function
-O	check-date-format-tofte.js	/^    function O() {$/;"	f	type:function
-S	check-date-format-tofte.js	/^    function S() {$/;"	f	type:function
-U	check-date-format-tofte.js	/^    function U() {$/;"	f	type:function
-W	check-date-format-tofte.js	/^    function W() {$/;"	f	type:function
-Y	check-date-format-tofte.js	/^    function Y() {$/;"	f	type:function
-a	check-date-format-tofte.js	/^    function a() {$/;"	f	type:function
-arrayExists	check-date-format-tofte.js	/^function arrayExists(array, x) {$/;"	f	type:boolean function(Array[string], string)
-d	check-date-format-tofte.js	/^    function d() {$/;"	f	type:function
-g	check-date-format-tofte.js	/^    function g() {$/;"	f	type:function
-h	check-date-format-tofte.js	/^    function h() {$/;"	f	type:function
-i	check-date-format-tofte.js	/^    function i() {$/;"	f	type:function
-j	check-date-format-tofte.js	/^    function j() {$/;"	f	type:function
-l	check-date-format-tofte.js	/^    function l() {$/;"	f	type:function
-m	check-date-format-tofte.js	/^    function m() {$/;"	f	type:function
-n	check-date-format-tofte.js	/^    function n() {$/;"	f	type:function
-r	check-date-format-tofte.js	/^    function r() {$/;"	f	type:function
-s	check-date-format-tofte.js	/^    function s() {$/;"	f	type:function
-t	check-date-format-tofte.js	/^    function t() {$/;"	f	type:function
-w	check-date-format-tofte.js	/^    function w() {$/;"	f	type:function
-y	check-date-format-tofte.js	/^    function y() {$/;"	f	type:function
-z	check-date-format-tofte.js	/^    function z() {$/;"	f	type:function
+%anonymous_function	check-date-format-tofte.js	/^Date.prototype.formatDate = function (input,time) {$/;"	f	lineno:8	type:string function(string, undefined)
+A	check-date-format-tofte.js	/^    function A() {$/;"	f	lineno:49	type:function
+B	check-date-format-tofte.js	/^    function B(){$/;"	f	lineno:54	type:function
+D	check-date-format-tofte.js	/^    function D() {$/;"	f	lineno:75	type:function
+F	check-date-format-tofte.js	/^    function F() {$/;"	f	lineno:79	type:function
+G	check-date-format-tofte.js	/^    function G() {$/;"	f	lineno:87	type:function
+H	check-date-format-tofte.js	/^    function H() {$/;"	f	lineno:103	type:function
+L	check-date-format-tofte.js	/^    function L() {$/;"	f	lineno:121	type:function
+M	check-date-format-tofte.js	/^    function M() {$/;"	f	lineno:140	type:function
+O	check-date-format-tofte.js	/^    function O() {$/;"	f	lineno:148	type:function
+S	check-date-format-tofte.js	/^    function S() {$/;"	f	lineno:166	type:function
+U	check-date-format-tofte.js	/^    function U() {$/;"	f	lineno:182	type:function
+W	check-date-format-tofte.js	/^    function W() {$/;"	f	lineno:186	type:function
+Y	check-date-format-tofte.js	/^    function Y() {$/;"	f	lineno:231	type:function
+a	check-date-format-tofte.js	/^    function a() {$/;"	f	lineno:45	type:function
+arrayExists	check-date-format-tofte.js	/^function arrayExists(array, x) {$/;"	f	lineno:1	type:boolean function(Array[string], string)
+d	check-date-format-tofte.js	/^    function d() {$/;"	f	lineno:70	type:function
+g	check-date-format-tofte.js	/^    function g() {$/;"	f	lineno:83	type:function
+h	check-date-format-tofte.js	/^    function h() {$/;"	f	lineno:91	type:function
+i	check-date-format-tofte.js	/^    function i() {$/;"	f	lineno:108	type:function
+j	check-date-format-tofte.js	/^    function j() {$/;"	f	lineno:113	type:function
+l	check-date-format-tofte.js	/^    function l() {$/;"	f	lineno:117	type:function
+m	check-date-format-tofte.js	/^    function m() {$/;"	f	lineno:134	type:function
+n	check-date-format-tofte.js	/^    function n() {$/;"	f	lineno:144	type:function
+r	check-date-format-tofte.js	/^    function r() {$/;"	f	lineno:157	type:function
+s	check-date-format-tofte.js	/^    function s() {$/;"	f	lineno:170	type:function
+t	check-date-format-tofte.js	/^    function t() {$/;"	f	lineno:175	type:function
+w	check-date-format-tofte.js	/^    function w() {$/;"	f	lineno:226	type:function
+y	check-date-format-tofte.js	/^    function y() {$/;"	f	lineno:253	type:function
+z	check-date-format-tofte.js	/^    function z() {$/;"	f	lineno:258	type:function
