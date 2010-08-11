@@ -4,12 +4,12 @@
 !_TAG_PROGRAM_NAME	jsctags	//
 !_TAG_PROGRAM_URL	http://github.com/pcwalton/jsctags	/GitHub repository/
 !_TAG_PROGRAM_VERSION	0.1	//
-%anonymous_function	check-crypto-aes.js	/^      function(c) { $/;"	f	lineno:346	type:function
-%anonymous_function	check-crypto-aes.js	/^      function(c) { $/;"	f	lineno:352	type:function
-%anonymous_function	check-crypto-aes.js	/^      function(c) { $/;"	f	lineno:362	type:function
-%anonymous_function	check-crypto-aes.js	/^      function(c) { $/;"	f	lineno:368	type:function
-%anonymous_function	check-crypto-aes.js	/^  return str.replace(\/!\\d\\d?\\d?!\/g, function(c) { return String.fromCharCode(c.slice(1,-1)); });$/;"	f	lineno:283	type:function
-%anonymous_function	check-crypto-aes.js	/^  return str.replace(\/[\\0\\t\\n\\v\\f\\r\\xa0'"!-]\/g, function(c) { return '!' + c.charCodeAt(0) + '!'; });$/;"	f	lineno:279	type:function
+%anonymous_function	check-crypto-aes.js	/^      function(c) { $/;"	f	lineno:346	type:string function(any)
+%anonymous_function	check-crypto-aes.js	/^      function(c) { $/;"	f	lineno:352	type:string function(any)
+%anonymous_function	check-crypto-aes.js	/^      function(c) { $/;"	f	lineno:362	type:string function(any)
+%anonymous_function	check-crypto-aes.js	/^      function(c) { $/;"	f	lineno:368	type:string function(any)
+%anonymous_function	check-crypto-aes.js	/^  return str.replace(\/!\\d\\d?\\d?!\/g, function(c) { return String.fromCharCode(c.slice(1,-1)); });$/;"	f	lineno:283	type:string function(any)
+%anonymous_function	check-crypto-aes.js	/^  return str.replace(\/[\\0\\t\\n\\v\\f\\r\\xa0'"!-]\/g, function(c) { return '!' + c.charCodeAt(0) + '!'; });$/;"	f	lineno:279	type:string function(any)
 AESDecryptCtr	check-crypto-aes.js	/^function AESDecryptCtr(ciphertext, password, nBits) {$/;"	f	lineno:230	type:string function(string, string, number)
 AESEncryptCtr	check-crypto-aes.js	/^function AESEncryptCtr(plaintext, password, nBits) {$/;"	f	lineno:164	type:string function(string, string, number)
 AddRoundKey	check-crypto-aes.js	/^function AddRoundKey(state, w, rnd, Nb) {  \/\/ xor Round Key into state S [§5.1.4]$/;"	f	lineno:75	type:Array[Array[number]] function(Array[Array[number]], Array[Array[number]], number, number)
