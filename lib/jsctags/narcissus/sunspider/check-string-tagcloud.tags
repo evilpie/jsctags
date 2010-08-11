@@ -17,5 +17,10 @@
 %anonymous_function	check-string-tagcloud.js	/^var tagInfo = tagInfoJSON.parseJSON(function(a, b) { if (a == "popularity") { return Math.log(b) \/ log2; } else {return b; } });$/;"	f	lineno:229	type:number function(string, any)
 %anonymous_function	check-string-tagcloud.js	/^var tagcloud_norm = tagcloud.replace(\/([0-9.]+)px\/g, function(str, p1) { return p1.substr(0, 10) + 'px' })$/;"	f	lineno:269	type:function
 f	check-string-tagcloud.js	/^        function f(n) {$/;"	f	lineno:79	type:function
+log2	check-string-tagcloud.js	/^var log2 = Math.log(2);$/;"	v	lineno:228	type:number
 makeTagCloud	check-string-tagcloud.js	/^function makeTagCloud(tagInfo)$/;"	f	lineno:231	type:string function(number)
+tagInfo	check-string-tagcloud.js	/^var tagInfo = tagInfoJSON.parseJSON(function(a, b) { if (a == "popularity") { return Math.log(b) \/ log2; } else {return b; } });$/;"	v	lineno:229	type:<number | null>
+tagInfoJSON	check-string-tagcloud.js	/^var tagInfoJSON = "";$/;"	v	lineno:226	type:string
+tagcloud	check-string-tagcloud.js	/^var tagcloud = makeTagCloud(tagInfo);$/;"	v	lineno:264	type:string
+tagcloud_norm	check-string-tagcloud.js	/^var tagcloud_norm = tagcloud.replace(\/([0-9.]+)px\/g, function(str, p1) { return p1.substr(0, 10) + 'px' })$/;"	v	lineno:269	type:string
 walk	check-string-tagcloud.js	/^            function walk(k, v) {$/;"	f	lineno:180	type:number function(string, any)

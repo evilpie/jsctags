@@ -108,7 +108,7 @@ function parse() {
         };
 
         var ast = parse($('#js').val(), 'js', 1);
-        myast = ast;
+        // myast = ast;
         //var ast = fixAst(parse($('#js').val(), 'js', 1));
         //var ast = labelAst(fixAst(parse($('#js').val(), 'js', 1)));
         //var ast = tagVarRefsAst(labelAst(fixAst(parse($('#js').val(),'js',1))));

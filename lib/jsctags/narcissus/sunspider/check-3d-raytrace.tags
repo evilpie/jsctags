@@ -32,3 +32,4 @@ sqrLengthVector	check-3d-raytrace.js	/^function sqrLengthVector(self) {$/;"	f	li
 sub	check-3d-raytrace.js	/^function sub(v1, v2) {$/;"	f	lineno:71	type:Array[number] function(Array[number], Array[number])
 subVector	check-3d-raytrace.js	/^function subVector(self, v) {$/;"	f	lineno:45	type:Array[number] function(Array[number], Array[number])
 transformMatrix	check-3d-raytrace.js	/^function transformMatrix(self, v) {$/;"	f	lineno:99	type:Array[number] function(Array[number], Array[number])
+zero	check-3d-raytrace.js	/^var zero = new Array(0,0,0);$/;"	v	lineno:187	type:Array[number]

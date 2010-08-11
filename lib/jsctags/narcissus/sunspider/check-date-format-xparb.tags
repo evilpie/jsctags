@@ -21,3 +21,7 @@
 %anonymous_function	check-date-format-xparb.js	/^Date.prototype.isLeapYear = function() {$/;"	f	lineno:310	type:function
 %anonymous_function	check-date-format-xparb.js	/^String.escape = function(string) {$/;"	f	lineno:347	type:string function(string)
 %anonymous_function	check-date-format-xparb.js	/^String.leftPad = function (val, size, ch) {$/;"	f	lineno:351	type:function
+date	check-date-format-xparb.js	/^var date = new Date("1\/1\/2007 1:11:11");$/;"	v	lineno:411	type:Date
+longFormat	check-date-format-xparb.js	/^    var longFormat = date.dateFormat("l, F d, Y g:i:s A");$/;"	v	lineno:416	type:any
+ret	check-date-format-xparb.js	/^var ret;$/;"	v	lineno:413	type:any
+shortFormat	check-date-format-xparb.js	/^    var shortFormat = date.dateFormat("Y-m-d");$/;"	v	lineno:415	type:any
