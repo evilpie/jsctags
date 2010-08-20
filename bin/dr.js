@@ -38,31 +38,66 @@
 
 var argv = process.argv;
 var path = require('path');
-require.paths.unshift(path.join(path.dirname(argv[1]), "..", "lib",
-    "jsctags"));
-
+ 
+var cwd = path.dirname(argv[1]);
+var libdir = path.join(cwd, "..", "lib");
+ 
+require.paths.unshift(path.join(libdir, "jsctags"),
+                      path.join(libdir, "formidable"));
+  
+var sys = require('sys');
 var _ = require('underscore')._;
 var http = require('http');
 var url = require('url');
+var formidable = require('formidable');
 var getTags = require('narcissus/jscfa').getTags;
 var parse = require('narcissus/jsparse').parse;
 
 http.createServer(function(req, resp) {
+  function error(code, msg) {
+    resp.writeHead(code, "Not Found", { 'Content-type': 'text/plain' });  
+    resp.end(code + " " + msg);
+  }
+ 
   if (url.parse(req.url).pathname !== '/analyze') {
-    resp.writeHead(404, "Not Found", { 'Content-type': 'text/plain' });
-    resp.end("404 Not Found");
+    error(404, "Not Found");
     return;
   }
+ 
+  if (req.method !== 'POST') {
+    error(405, 'Only POST method allowed');
+    return;                                        
+  }
 
-  var buf = [];
-  req.on('data', _(buf.push).bind(buf));
-  req.on('end', function() {
-    var lines = buf.join("").split("\n");
-    var ast = parse(lines, "js", 1);
-    var tags = getTags(ast, "js", lines, {});
+  // FIXME: prevent formidable from saving files
+  var form = new formidable.IncomingForm();
+  var src;
 
-    resp.writeHead(200, "OK", { 'Content-type': 'application/json' });
-    resp.end(JSON.stringify(tags));
-  });
+  form
+    .addListener('error', function(err) {
+      error(400, err);
+    })
+    .addListener('field', function(field, value) {
+      if (field === 'src')
+        src = value;
+    })
+    .addListener('end', function() {
+      if (!src) {
+        error(400, "no 'src' field in POST");
+        return;
+      }
+      try {
+        var lines = src.split("\n");
+        var ast = parse(src, "js", 1);
+        var tags = getTags(ast, "js", lines, {});
+        var json = JSON.stringify(tags);
+      } catch (e) {
+        error(400, e.message);
+        return;
+      }
+      resp.writeHead(200, "OK", { 'Content-type': 'application/json' });
+      resp.end(json);
+    });
+
+  form.parse(req);
 }).listen(8080, "127.0.0.1");
-
