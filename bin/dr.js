@@ -54,6 +54,11 @@ var getTags = require('narcissus/jscfa').getTags;
 var parse = require('narcissus/jsparse').parse;
 
 http.createServer(function(req, resp) {
+  function end(x) {
+    resp.writeHead(200, "OK", { 'Content-type': 'application/json' });
+    resp.end(JSON.stringify(x));
+  }
+
   function error(code, msg) {
     resp.writeHead(code, "Not Found", { 'Content-type': 'text/plain' });  
     resp.end(code + " " + msg);
@@ -86,17 +91,21 @@ http.createServer(function(req, resp) {
         error(400, "no 'src' field in POST");
         return;
       }
+      var lines, ast, tags;
       try {
-        var lines = src.split("\n");
-        var ast = parse(src, "js", 1);
-        var tags = getTags(ast, "js", lines, {});
-        var json = JSON.stringify(tags);
+        lines = src.split("\n");
+        ast = parse(src, "js", 1);
       } catch (e) {
-        error(400, e.message);
+        end({ error: e.message, stage: "parse" });
         return;
       }
-      resp.writeHead(200, "OK", { 'Content-type': 'application/json' });
-      resp.end(json);
+
+      try {
+        tags = getTags(ast, "js", lines, {});
+        end(tags);
+      } catch (e) {
+        end({ error: e.message, stage: "analysis" });
+      }
     });
 
   form.parse(req);
