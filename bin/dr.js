@@ -92,9 +92,11 @@ http.createServer(function(req, resp) {
       var rn = spawn(path.join(cwd, 'rn.js'));
 
       // on timeout, kill the process and send an error
-      setTimeout(function() {
-        rn.kill(); // ooh, brutal ;)
-        error(500, "Service timed out");
+      var timeout = setTimeout(function() {
+        if (rn) {
+          rn.kill(); // ooh, brutal ;)
+          error(500, "Service timed out");
+        }
       }, 10000);
 
       // send the input program to rn.js
@@ -104,6 +106,8 @@ http.createServer(function(req, resp) {
       var buf = [];
       rn.stdout.on("data", _(buf.push).bind(buf));
       rn.stdout.on("end", function() {
+        clearTimeout(timeout);
+        rn = null;
         resp.writeHead(200, "OK", { "Content-type": "application/json" });
         resp.end(buf.join(""));
       });
