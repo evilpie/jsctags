@@ -104,7 +104,7 @@ http.createServer(function(req, resp) {
       var buf = [];
       rn.stdout.on("data", _(buf.push).bind(buf));
       rn.stdout.on("end", function() {
-        resp.writeHead(200, "OK", { "Content-type", "application/json" });
+        resp.writeHead(200, "OK", { "Content-type": "application/json" });
         resp.end(buf.join(""));
       });
     });
