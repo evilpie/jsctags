@@ -54,11 +54,6 @@ var getTags = require('narcissus/jscfa').getTags;
 var parse = require('narcissus/jsparse').parse;
 
 http.createServer(function(req, resp) {
-  function end(x) {
-    resp.writeHead(200, "OK", { 'Content-type': 'application/json' });
-    resp.end(JSON.stringify(x));
-  }
-
   function error(code, msg) {
     resp.writeHead(code, "Not Found", { 'Content-type': 'text/plain' });  
     resp.end(code + " " + msg);
@@ -88,24 +83,30 @@ http.createServer(function(req, resp) {
     })
     .addListener('end', function() {
       if (!src) {
-        error(400, "no 'src' field in POST");
-        return;
-      }
-      var lines, ast, tags;
-      try {
-        lines = src.split("\n");
-        ast = parse(src, "js", 1);
-      } catch (e) {
-        end({ error: e.message, stage: "parse" });
+        error(400, 'No "src" field in POST');
         return;
       }
 
-      try {
-        tags = getTags(ast, "js", lines, {});
-        end(tags);
-      } catch (e) {
-        end({ error: e.message, stage: "analysis" });
-      }
+      // farm the work out to rn.js
+      var spawn = require('child_process').spawn;
+      var rn = spawn(path.join(cwd, 'rn.js'));
+
+      // on timeout, kill the process and send an error
+      setTimeout(function() {
+        rn.kill(); // ooh, brutal ;)
+        error(500, "Service timed out");
+      }, 10000);
+
+      // send the input program to rn.js
+      rn.stdin.end(src);
+
+      // forward the output ctags to the response
+      var buf = [];
+      rn.stdout.on("data", _(buf.push).bind(buf));
+      rn.stdout.on("end", function() {
+        resp.writeHead(200, "OK", { "Content-type", "application/json" });
+        resp.end(buf.join(""));
+      });
     });
 
   form.parse(req);
