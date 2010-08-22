@@ -57,12 +57,17 @@ http.createServer(function(req, resp) {
   var buf = [];
   req.on('data', _(buf.push).bind(buf));
   req.on('end', function() {
-    var lines = buf.join("").split("\n");
-    var ast = parse(lines, "js", 1);
-    var tags = getTags(ast, "js", lines, {});
-
-    resp.writeHead(200, "OK", { 'Content-type': 'application/json' });
-    resp.end(JSON.stringify(tags));
+      var lines = buf.join("").split("\n");
+      try {
+        var ast = parse(lines, "js", 1);
+        var tags = getTags(ast, "js", lines, {});
+        
+        resp.writeHead(200, "OK", { 'Content-type': 'application/json' });
+        resp.end(JSON.stringify(tags));
+      }
+      catch (e) {
+        throw new Error(lines);
+      }
   });
 }).listen(8080, "127.0.0.1");
 
