@@ -56,23 +56,23 @@ stdin.setEncoding("utf8");
 var buf = [];
 stdin.on("data", _(buf.push).bind(buf));
 stdin.on("end", function() {
-    var src = buf.join("");
-    var lines, ast;
-    try {
-        lines = src.split("\n");
-        ast = parse(src, "js", 1);
-    } catch (e) {
-        sys.print(JSON.stringify({ error: e.message, stage: "parse" }));
-        process.exit();
-    }
-
-    var json;
-    try {
-        json = getTags(ast, "js", lines, {});
-    } catch (e) {
-        json = { error: e.message, stage: "analysis" };
-    }
-
-    sys.print(JSON.stringify(json));
+  var src = buf.join("");
+  var lines, ast;
+  try {
+    lines = src.split("\n");
+    ast = parse(src, "js", 1);
+  } catch (e) {
+    sys.print(JSON.stringify({ error: e.message, stage: "parse" }));
     process.exit();
+  }
+
+  var json;
+  try {
+    json = getTags(ast, "js", lines, {});
+  } catch (e) {
+    json = { error: e.message, stage: "analysis" };
+  }
+
+  sys.print(JSON.stringify(json));
+  process.exit();
 });

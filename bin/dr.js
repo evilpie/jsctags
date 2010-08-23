@@ -42,76 +42,148 @@ var path = require('path');
 var cwd = path.dirname(argv[1]);
 var libdir = path.join(cwd, "..", "lib");
  
-require.paths.unshift(path.join(libdir, "jsctags"),
-                      path.join(libdir, "formidable"));
+require.paths.unshift(path.join(libdir, "jsctags"));
   
 var sys = require('sys');
 var _ = require('underscore')._;
 var http = require('http');
 var url = require('url');
-var formidable = require('formidable');
-var getTags = require('narcissus/jscfa').getTags;
-var parse = require('narcissus/jsparse').parse;
+var servetypes = require('servetypes');
 
-http.createServer(function(req, resp) {
-  function error(code, msg) {
-    resp.writeHead(code, "Not Found", { 'Content-type': 'text/plain' });  
-    resp.end(code + " " + msg);
+function usage(msg) {
+  sys.print("usage: " + path.basename(argv[1]) + " [options]\n");
+  sys.print("  -h/--help        Print usage information\n");
+  sys.print("  -s/--static      Directory containing static web content\n");
+  sys.print("  -p/--port        Server port to listen on\n");
+  if (msg) {
+    sys.print("\n" + msg + "\n");
+    process.exit(1);
   }
- 
-  if (url.parse(req.url).pathname !== '/analyze') {
-    error(404, "Not Found");
+
+  process.exit(0);
+}
+
+function parseOpts(argv, callback) {
+  var dir = null;
+  var port = 8080;
+
+  for (var i = 0; i < argv.length; i++) {
+    switch (argv[i]) {
+    case "--help":
+    case "-h":
+      callback(null, { help: true, dir: null, port: null });
+      break;
+
+    case "--port":
+    case "-p":
+      i++;
+      if (i >= argv.length) {
+        callback("port not specified", null);
+        return;
+      }
+      port = parseInt(argv[i]);
+      if (isNaN(port)) {
+        callback("invalid port", null);
+        return;
+      }
+      break;
+
+    case "--static":
+    case "-s":
+      i++;
+      if (i >= argv.length) {
+        callback("static source directory not specified");
+        return;
+      }
+      dir = argv[i];
+      break;
+    }
+  }
+
+  if (!dir) {
+    callback(null, { help: false, dir: null, port: port });
     return;
   }
- 
-  if (req.method !== 'POST') {
-    error(405, 'Only POST method allowed');
-    return;                                        
-  }
 
-  // FIXME: prevent formidable from saving files
-  var form = new formidable.IncomingForm();
-  var src;
+  require('fs').stat(path.normalize(dir), function(err, stats) {
+    if (!stats || !stats.isDirectory())
+      callback("bad directory", null);
+    else
+      callback(null, { help: false, dir: dir, port: port });
+  });
+}
 
-  form
-    .addListener('error', function(err) {
-      error(400, err);
-    })
-    .addListener('field', function(field, value) {
-      if (field === 'src')
-        src = value;
-    })
-    .addListener('end', function() {
-      if (!src) {
-        error(400, 'No "src" field in POST');
+// construct a request handler for the entire web site
+function makeSiteHandler(dir) {
+  var mimeTypes = {
+    jpg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    html: "text/html",
+    txt: "text/plain"
+  };
+
+  return function(req, resp) {
+    var query = url.parse(req.url).pathname;
+
+    if (query === '/analyze') {
+      servetypes.analyze(cwd, req, resp);
+      return;
+    }
+
+    if (query === '/')
+        query = '/index.html';
+
+    var file = path.join(dir, query);
+    var ext = path.extname(file);
+
+    var fs = require('fs');
+    fs.stat(file, function(err, stats) {
+      if (!stats || !stats.isFile()) {
+        sys.debug("404: " + file);
+        resp.writeHead(404, "Not Found", { 'Content-type': 'text/plain' });
+        resp.end("404 Not Found");
         return;
       }
 
-      // farm the work out to rn.js
-      var spawn = require('child_process').spawn;
-      var rn = spawn(path.join(cwd, 'rn.js'));
+      resp.writeHead(200, "OK", { "Content-type": mimeTypes[ext] });
 
-      // on timeout, kill the process and send an error
-      var timeout = setTimeout(function() {
-        if (rn) {
-          rn.kill(); // ooh, brutal ;)
-          error(500, "Service timed out");
-        }
-      }, 10000);
-
-      // send the input program to rn.js
-      rn.stdin.end(src);
-
-      // forward the output ctags to the response
-      var buf = [];
-      rn.stdout.on("data", _(buf.push).bind(buf));
-      rn.stdout.on("end", function() {
-        clearTimeout(timeout);
-        rn = null;
-        resp.writeHead(200, "OK", { "Content-type": "application/json" });
-        resp.end(buf.join(""));
-      });
+      var stream = fs.createReadStream(file);
+      stream.on("data", _.bind(resp.write, resp));
+      stream.on("end", _.bind(resp.end, resp));
     });
+  };
+}
 
-  form.parse(req);
-}).listen(8080, "127.0.0.1");
+// request handler for just the JSON service
+function service(req, resp) {
+  var query = url.parse(req.url).pathname;
+
+  if (query !== '/analyze') {
+    resp.writeHead(404, "Not Found", { 'Content-type': 'text/plain' });
+    resp.end("404 Not Found");
+    return;
+  }
+
+  servetypes.analyze(cwd, req, resp);
+}
+
+parseOpts(argv.slice(2), function(err, opts) {
+  if (err)
+    usage(err);
+
+  if (opts.help)
+    usage();
+
+  var handler;
+  if (opts.dir) {
+    sys.log("staging site from " + opts.dir);
+    handler = makeSiteHandler(opts.dir);
+  } else {
+    sys.log("running JSON service only");
+    handler = service;
+  }
+
+  sys.log("listening on port " + opts.port + "...");
+  http.createServer(handler).listen(opts.port, "127.0.0.1");
+});

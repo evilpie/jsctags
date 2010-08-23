@@ -1,0 +1,342 @@
+<html>
+<head>
+<title>Doctor JS</title>
+<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Cardo" />
+<style type="text/css">
+html {
+    overflow-y: scroll;
+}
+
+body {
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+
+h1, h2 {
+    font-family: Cardo, 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+
+a, span.feature {
+    color: #3b2d25;
+    /*text-decoration: none;*/
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#header {
+    width: 400px;
+    margin: 50px auto 40px auto;
+    text-align: center;
+}
+
+#header h1 {
+    margin: 0;
+}
+
+#header h2 {
+    font-weight: normal;
+    margin: 0.75em;
+}
+
+#body {
+    width: 600px;
+    margin: 0 auto 0 auto;
+    text-align: left;
+}
+
+#body ul {
+    list-style-type: none;
+}
+
+#body #privacy {
+    font-size: 85%;
+}
+
+#demos {
+    margin: 0.5em 0 0.5em 2em;
+}
+
+#demos a img {
+    border: none;
+    vertical-align: absmiddle;
+}
+
+a.demo {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.source {
+    margin: 0;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #3b2d25;
+}
+
+.analysis, .analyzing {
+    margin: 3px 0 0 0;
+}
+
+.analysis {
+    color: #3b2d25;
+}
+
+.analyzing {
+    font-style: italic;
+    color: #aaa;
+}
+</style>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18115710-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+
+<body onload="DrJS.go()">
+<div id="header">
+<p><img src="couch.gif" width="234" height="186" /></p>
+
+<h1>Doctor JS</h1>
+<h2>Tell the doctor about it.</h2>
+</div>
+
+<div id="body">
+<p>
+Doctor JS is a genius. He'll analyze your JavaScript code, complete with:
+</p>
+
+<!-- FIXME: make entire row clickable? -->
+<table id="demos">
+<tr>
+<td><span class="feature">polymorphism</span></td>
+<td><a href="javascript:void(0)" class="demo"><img src="unchecked.png" width="16" height="17" /></a></td>
+</tr>
+<tr>
+<td><span class="feature">prototypes</span></td>
+<td><a href="javascript:void(0)" class="demo"><img src="unchecked.png" width="16" height="17" /></a></td>
+</tr>
+<tr>
+<td><span class="feature">exceptions</span></td>
+<td><a href="javascript:void(0)" class="demo"><img src="unchecked.png" width="16" height="17" /></a></td>
+</tr>
+<tr>
+<td><span class="feature">callbacks</span></td>
+<td><a href="javascript:void(0)" class="demo"><img src="unchecked.png" width="16" height="17" /></a></td>
+</tr>
+</table>
+
+<p>
+Just POST to <b>http://doctorjs.org/analyze</b> with the <code>src</code> field set to your source code, and the doctor will give you an analysis in JSON. <a href="try.html">Try it out!</a>
+</p>
+
+<p id="privacy">
+Doctor JS respects your privacy. He won't share your code with anyone else, nor will he store your code longer than necessary to diagnose his own problems if they occur.
+</p>
+</div>
+<script type="application/javascript" src="jquery-1.3.2.min.js"></script>
+<script type="application/javascript" src="jquery.qtip-1.0.0-rc3.min.js"></script>
+<script type="application/javascript">
+DrJS = (function(global) {
+
+function debug(str) {
+    if (typeof console === "object" && typeof console.log === "function")
+        console.log(str);
+}
+
+var demos = [ "function id(x) { return x;}\nid(42);\nid('hello, doctor!');"
+            , "function Rectangle(w, h) {\n    this.w = w;\n    this.h = h;\n}\nRectangle.prototype.area = function() {\n    return this.w * this.h;\n};\nvar a = (new Rectangle(2, 3)).area();"
+            , "function findLargest(a) {\n    if (a.length === 0) throw new Error('empty array');\n    var max = a[0];\n    for (var i = 1, l = a.length; i < l; i++)\n        if (a[i] > max)\n            max = a[i];\n    return max;\n}\nfunction foo() {\n    var a = [1,2,3];\n    try {\n        return findLargest(a);\n    } catch (e) {\n        return e.message;\n    }\n}\nfoo();"
+            , "function call(f, x) { return f(x); }\nfunction add1(n) { return n + 1; }\nfunction truncate(s) { return s.substring(0, s.length - 1); }\nvar n = call(add1, 41);\nvar s = call(truncate, 'abcd');"
+            ];
+
+var status = demos.map(function(x) { return false });
+
+function scrub(str) {
+    return str.replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/ /g, '&nbsp;')
+              .replace(/\n/g, '<br />');
+}
+
+function go() {
+    function makeDemoTooltip(i) {
+        var count = demos[i].split(/\n/).length;
+        return {
+            content: '<p class="source">' + scrub(demos[i]) + '</p><p class="analyzing">analyzing...</p>',
+            show: {
+                delay: 0,
+                when: {
+                    event: "click"
+                }
+            },
+            hide: "unfocus",
+            style: {
+                name: "blue",
+                tip: "bottomLeft",
+                border: { radius: 8 },
+                width: 400,
+                height: (count + 8) + 'em',
+                "font-family": "Lucida Grande, Lucida Console, Monaco, Courier New, Courier, monospaced",
+                "font-size": "10pt"
+            },
+            position: {
+                corner: {
+                    target: "topRight",
+                    tooltip: "bottomLeft"
+                },
+                adjust: {
+                    x: 5
+                }
+            },
+            api: {
+                onShow: function() {
+                    if (!status[i])
+                        runDemo(i);
+                }
+            }
+        };
+    }
+
+    for (var i = 0; i < demos.length; i++) {
+        $('table a.demo:eq(' + i + ')').qtip(makeDemoTooltip(i));
+    }
+}
+
+// quick-n-dirty parser of Dimitris's original type format
+function parseType(src) {
+    function match(str) {
+        var n = str.length;
+        if (src.length && src.substring(0, n) === str) {
+            src = src.substring(n).trim();
+            return true;
+        }
+        return false;
+    }
+
+    function mustMatch(str, msg) {
+        if (!match(str))
+            throw new Error(msg + " (" + src + ")");
+    }
+
+    function Type() {
+        var root;
+        if (match("any")) {
+            root = "any";
+        } else if (match("string")) {
+            root = "string";
+        } else if (match("number")) {
+            root = "number";
+        } else if (match("Array")) {
+            mustMatch("[", "invalid array type");
+            root = { kind: "array", elementType: Type() };
+            mustMatch("]", "invalid array type");
+        } else if (src.length && src[0] === "<") {
+            root = UnionType();
+        } else {
+            var re = /^([a-zA-Z_$][a-zA-Z_$0-9]*)/;
+            var result = re.exec(src);
+            if (!result)
+                throw new Error("unrecognized type: " + src);
+            root = result[0];
+            src = src.substring(root.length).trim();
+        }
+
+        if (match("function")) {
+            mustMatch("(", "invalid function type");
+            var args = [];
+            if (!match(")")) {
+                do {
+                    args.push(Type());
+                } while (match(","));
+                mustMatch(")", "invalid function type");
+            }
+            return { kind: "function", returnType: root, argTypes: args };
+        }
+
+        return root;
+    }
+
+    function UnionType() {
+        mustMatch("<", "invalid union type");
+        var variants = [];
+        if (!match(">")) {
+            do {
+                variants.push(Type());
+            } while (match("|"));
+            mustMatch(">", "invalid union type");
+        }
+        return { kind: "union", variants: variants };
+    }
+
+    return Type();
+}
+
+// a hack to reformat function types more nicely than jscfa currently does
+function formatType(type) {
+    if (typeof type === "string")
+        return type;
+
+    if (type.kind === "function") {
+        return "function(" +
+               type.argTypes.map(formatType).join(", ") +
+               ") &rarr; " +
+               formatType(type.returnType);
+    } else if (type.kind === "array") {
+        return "Array[" + formatType(type.elementType) + "]";
+    } else if (type.kind === "union") {
+        return "&lt;" + type.variants.map(formatType).join(" | ") + "&gt;";
+    }
+
+    throw new Error("unreocognized type");
+}
+
+function runDemo(i) {
+    function onError(xhr, status, error) {
+        debug("XHR error: " + error);
+    }
+
+    var api = $('table a.demo:eq(' + i + ')').qtip("api");
+
+    $.ajax({
+        url: "/analyze",
+        dataType: "json",
+        type: "POST",
+        data: { src: demos[i] },
+        success: function(json) {
+            var fns = json.filter(function(x) { return x.kind === 'f' });
+            var s = "";
+            for (var j in fns) {
+                var entry = fns[j];
+                if (s !== "")
+                    s += '<br />';
+                s += '<b>' + entry.name + '</b>' + " : ";
+                s += formatType(parseType(entry.type.trim()));
+            }
+            api.updateContent('<p class="source">' + scrub(demos[i]) + '</p><p class="analysis">' + s + '</p>', true);
+            status[i] = true;
+        },
+        error: onError
+    });
+
+    $('a.demo img')[i].src = 'checked.png';
+}
+
+return {
+    go: go,
+    demos: demos,
+    status: status,
+    runDemo: runDemo
+};
+})(this);
+</script>
+</body>
+</html>
