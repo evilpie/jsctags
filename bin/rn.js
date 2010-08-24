@@ -38,36 +38,41 @@
 
 var argv = process.argv;
 var path = require('path');
-require.paths.unshift(path.join(path.dirname(argv[1]), "..", "lib",
-    "jsctags"));
+ 
+var cwd = path.dirname(argv[1]);
+var libdir = path.join(cwd, "..", "lib");
+ 
+require.paths.unshift(path.join(libdir, "jsctags"));
 
+var sys = require('sys');
 var _ = require('underscore')._;
-var http = require('http');
-var url = require('url');
 var getTags = require('narcissus/jscfa').getTags;
 var parse = require('narcissus/jsparse').parse;
 
-http.createServer(function(req, resp) {
-  if (url.parse(req.url).pathname !== '/analyze') {
-    resp.writeHead(404, "Not Found", { 'Content-type': 'text/plain' });
-    resp.end("404 Not Found");
-    return;
+var stdin = process.openStdin();
+
+stdin.setEncoding("utf8");
+
+var buf = [];
+stdin.on("data", _(buf.push).bind(buf));
+stdin.on("end", function() {
+  var src = buf.join("");
+  var lines, ast;
+  try {
+    lines = src.split("\n");
+    ast = parse(src, "js", 1);
+  } catch (e) {
+    sys.print(JSON.stringify({ error: e.message, stage: "parse" }));
+    process.exit();
   }
 
-  var buf = [];
-  req.on('data', _(buf.push).bind(buf));
-  req.on('end', function() {
-      var lines = buf.join("").split("\n");
-      try {
-        var ast = parse(lines, "js", 1);
-        var tags = getTags(ast, "js", lines, {});
-        
-        resp.writeHead(200, "OK", { 'Content-type': 'application/json' });
-        resp.end(JSON.stringify(tags));
-      }
-      catch (e) {
-        throw new Error(lines);
-      }
-  });
-}).listen(8080, "127.0.0.1");
+  var json;
+  try {
+    json = getTags(ast, "js", lines, {});
+  } catch (e) {
+    json = { error: e.message, stage: "analysis" };
+  }
 
+  sys.print(JSON.stringify(json));
+  process.exit();
+});
