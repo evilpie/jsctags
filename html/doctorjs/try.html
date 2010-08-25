@@ -52,7 +52,7 @@ a {
 
 #source {
     width: 350px;
-    height: 25em;
+    height: 325px;
     font-family: "Lucida Grande", "Lucida Console", Monaco, "Courier New", Courier, monospaced;
     font-size: 10pt;
     float: left;
@@ -70,12 +70,50 @@ a {
 }
 
 #analysis {
-    width: 350px;
-    height: 25em;
+    width: 330px;
+    height: 305px;
     font-family: "Lucida Grande", "Lucida Console", Monaco, "Courier New", Courier, monospaced;
     font-size: 10pt;
     float: right;
     margin-bottom: 20px;
+    background-color: #EEEEEE;
+    overflow: auto;
+    padding: 10px;
+    border: solid 1px #808080;
+}
+
+#analysis .error {
+    font-weight: bold;
+}
+
+#analysis .name {
+    font-weight: bold;
+}
+
+#notify-container {
+    color: #3B2D25;
+    font-family: Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+    font-size: 130%;
+    font-weight: bold;
+    position: fixed;
+    left: 0;
+    top: 0;
+    text-align: center;
+    width: 100%;
+    z-index: 100;
+    line-height: 1;
+    display: none;
+}
+
+#notify-container div {
+    font-size: 80%;
+    background-color: #FDF0AB;
+    border-bottom: 1px solid #3B2D25;
+    padding: 7px 0;
+}
+
+#notify-container a {
+    color: #735005;
 }
 </style>
 <script type="text/javascript">
@@ -94,6 +132,11 @@ a {
 </head>
 
 <body onload="void(0)">
+<div id="notify-container">
+<div id="notify">
+<span class="notify-text">Oh dear, something went wrong. Please try again in a moment.</span>
+</div>
+</div>
 <div id="header">
 <p><img src="couch.gif" width="234" height="186" /></p>
 </div>
@@ -106,34 +149,94 @@ function example() {
     return "hello, world!";
 }
 </textarea>
+<div id="analysis" class="analyzing"></div>
 <img id="analyze" src="go.jpg" width="67" height="50" />
-<textarea id="analysis"></textarea>
 </p>
 </div>
 
 <div style="clear:both"></div>
+<div style="display: none;" id="magic"></div>
 
 <p id="privacy">
 Doctor JS respects your privacy. He won't share your code with anyone else, nor will he store your code longer than necessary to diagnose his own problems if they occur.
 </p>
 </div>
-<script type="application/javascript" src="beautify.js"></script>
 <script type="application/javascript" src="jquery-1.3.2.min.js"></script>
+<script type="application/javascript" src="jquery.spinner.js"></script>
+<script type="application/javascript" src="parse-type.js"></script>
 <script type="application/javascript">
+(function() {
+
+function capitalize(str) {
+    return str[0].toUpperCase() + str.substring(1);
+}
+
+var notify = $('#notify-container');
+var analysis = $('#analysis');
+var source = $('#source')[0];
+
+var timeout = null;
+
+function clearNotify() {
+    if (!notify.is(':hidden'))
+        notify.fadeOut();
+
+    if (timeout !== null) {
+        clearTimeout(timeout);
+        timeout = null;
+    }
+}
+
+$('body').click(clearNotify);
+
 $('#analyze').click(function() {
+    analysis.text("");
+    analysis.spinner({
+        img: "ajax-loader.gif",
+        position: "center"
+    });
     $.ajax({
         url: "/analyze",
         dataType: "json",
         type: "POST",
-        data: { src: $('#source')[0].value },
+        data: { src: source.value },
         success: function(json) {
-            $('#analysis').text(js_beautify(JSON.stringify(json)));
+            analysis.spinner("remove");
+
+            // analysis error
+            if ("error" in json) {
+                analysis.append('<span class="error">' +
+                                capitalize(json.stage) +
+                                ' error:</span> ' +
+                                json.error);
+                return;
+            }
+
+            json.sort(function(entry1, entry2) {
+                return parseInt(entry1.lineno) - parseInt(entry2.lineno);
+            });
+
+            for (var key in json) {
+                var entry = json[key];
+                analysis.append('<span class="lineno">' +
+                                entry.lineno +
+                                '</span>: ' +
+                                '<span class="name">' +
+                                entry.name +
+                                '</span> : ' +
+                                formatType(parseType(entry.type.trim())) +
+                                '<br />');
+            }
         },
         error: function() {
-            alert("network error");
+            analysis.spinner("remove");
+            notify.fadeIn();
+            timeout = setTimeout(clearNotify, 10000);
         }
     });
 });
+
+})()
 </script>
 </body>
 </html>

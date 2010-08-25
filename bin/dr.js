@@ -54,6 +54,7 @@ function usage(msg) {
   sys.print("usage: " + path.basename(argv[1]) + " [options]\n");
   sys.print("  -h/--help        Print usage information\n");
   sys.print("  -s/--static      Directory containing static web content\n");
+  sys.print("  -n/--no-service  Disable the JSON service");
   sys.print("  -p/--port        Server port to listen on\n");
   if (msg) {
     sys.print("\n" + msg + "\n");
@@ -66,12 +67,18 @@ function usage(msg) {
 function parseOpts(argv, callback) {
   var dir = null;
   var port = 8080;
+  var service = true;
 
   for (var i = 0; i < argv.length; i++) {
     switch (argv[i]) {
     case "--help":
     case "-h":
-      callback(null, { help: true, dir: null, port: null });
+      callback(null, { help: true, dir: null, port: null, service: null });
+      break;
+
+    case "--no-service":
+    case "-n":
+      service = false;
       break;
 
     case "--port":
@@ -92,7 +99,7 @@ function parseOpts(argv, callback) {
     case "-s":
       i++;
       if (i >= argv.length) {
-        callback("static source directory not specified");
+        callback("static source directory not specified", null);
         return;
       }
       dir = argv[i];
@@ -100,8 +107,13 @@ function parseOpts(argv, callback) {
     }
   }
 
+  if (!service && !dir) {
+    callback("service disabled without static directory", null);
+    return;
+  }
+
   if (!dir) {
-    callback(null, { help: false, dir: null, port: port });
+    callback(null, { help: false, dir: null, port: port, service: service });
     return;
   }
 
@@ -109,12 +121,12 @@ function parseOpts(argv, callback) {
     if (!stats || !stats.isDirectory())
       callback("bad directory", null);
     else
-      callback(null, { help: false, dir: dir, port: port });
+      callback(null, { help: false, dir: dir, port: port, service: service });
   });
 }
 
 // construct a request handler for the entire web site
-function makeSiteHandler(dir) {
+function makeSiteHandler(dir, service) {
   var mimeTypes = {
     jpg: "image/jpeg",
     png: "image/png",
@@ -126,7 +138,7 @@ function makeSiteHandler(dir) {
   return function(req, resp) {
     var query = url.parse(req.url).pathname;
 
-    if (query === '/analyze') {
+    if (service && query === '/analyze') {
       servetypes.analyze(cwd, req, resp);
       return;
     }
@@ -178,7 +190,7 @@ parseOpts(argv.slice(2), function(err, opts) {
   var handler;
   if (opts.dir) {
     sys.log("staging site from " + opts.dir);
-    handler = makeSiteHandler(opts.dir);
+    handler = makeSiteHandler(opts.dir, opts.service);
   } else {
     sys.log("running JSON service only");
     handler = service;
