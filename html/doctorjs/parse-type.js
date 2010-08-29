@@ -40,7 +40,7 @@ function parseType(src) {
             src = src.substring(root.length).trim();
         }
 
-        if (match("function")) {
+        while (match("function")) {
             mustMatch("(", "invalid function type");
             var args = [];
             if (!match(")")) {
@@ -49,7 +49,7 @@ function parseType(src) {
                 } while (match(","));
                 mustMatch(")", "invalid function type");
             }
-            return { kind: "function", returnType: root, argTypes: args };
+            root = { kind: "function", returnType: root, argTypes: args };
         }
 
         return root;
