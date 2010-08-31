@@ -183,7 +183,7 @@ function processPath(p) {
         });
     } else if (path.extname(p).toLowerCase() === ".js") {
         try {
-            var data = fs.readFileSync(p);
+            var data = fs.readFileSync(p, "utf8");
             tags.scan(data, p, getModuleInfo(p));
         } catch (e) {
             if ('lineNumber' in e) {
