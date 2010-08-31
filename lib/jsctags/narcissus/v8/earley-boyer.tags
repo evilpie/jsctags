@@ -137,6 +137,7 @@ sc_GenericOutputPort	earley-boyer.js	/^function sc_GenericOutputPort(appendJSStr
 sc_Hashtable	earley-boyer.js	/^function sc_Hashtable() {$/;"	f	lineno:1968	type:<void | sc_Hashtable> function()
 sc_HashtableElement	earley-boyer.js	/^function sc_HashtableElement(key, val) {$/;"	f	lineno:1975	type:<void | sc_HashtableElement> function(any, any)
 sc_InputPort	earley-boyer.js	/^function sc_InputPort() {$/;"	f	lineno:2108	type:sc_InputPort function()
+sc_JS_GLOBALS	earley-boyer.js	/^var sc_JS_GLOBALS = this;$/;"	v	lineno:52	type:Global Object
 sc_KEYWORD_PREFIX	earley-boyer.js	/^var sc_KEYWORD_PREFIX = "\\u1E9D";$/;"	v	lineno:3111	type:string
 sc_OutputPort	earley-boyer.js	/^function sc_OutputPort() {$/;"	f	lineno:2700	type:sc_OutputPort function()
 sc_Pair	earley-boyer.js	/^function sc_Pair(car, cdr) {$/;"	f	lineno:536	type:sc_Pair function(<number | string | boolean | undefined | null | sc_Pair | sc_Char | Array>, <number | string | boolean | null | sc_Pair | Array>)
