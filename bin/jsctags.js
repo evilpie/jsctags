@@ -177,13 +177,14 @@ function processPath(p) {
     }
     idsSeen[id] = true;
 
+    var ext = path.extname(p).toLowerCase();
     if (st.isDirectory()) {
         fs.readdirSync(p).forEach(function(filename) {
             processPath(path.join(p, filename));
         });
-    } else if (path.extname(p).toLowerCase() === ".js") {
+    } else if (ext === ".js" || ext === ".jsm") {
         try {
-            var data = fs.readFileSync(p);
+            var data = fs.readFileSync(p, "utf8");
             tags.scan(data, p, getModuleInfo(p));
         } catch (e) {
             if ('lineNumber' in e) {
